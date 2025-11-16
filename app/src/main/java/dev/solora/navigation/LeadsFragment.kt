@@ -252,13 +252,13 @@ class LeadsFragment : Fragment() {
         
         dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
             dialog.dismiss()
-            showUpdateStatusDialog(lead)
+            showUpdateStatusDialog(lead, tvLeadStatus)
         }
         
         dialog.show()
     }
     
-    private fun showUpdateStatusDialog(lead: FirebaseLead) {
+    private fun showUpdateStatusDialog(lead: FirebaseLead, statusTextView: TextView? = null) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_status_selection, null)
         val radioGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.radio_group_status)
         val btnUpdate = dialogView.findViewById<Button>(R.id.btn_update)
@@ -314,6 +314,10 @@ class LeadsFragment : Fragment() {
                 lead.id?.let { leadId ->
                     leadsViewModel.updateLeadStatus(leadId, selectedStatus)
                     val displayName = statusOptions.find { it.second == selectedStatus }?.first ?: selectedStatus
+                    
+                    // Update the status TextView immediately if provided
+                    statusTextView?.text = selectedStatus.uppercase()
+                    
                     Toast.makeText(requireContext(), "Status updated to $displayName", Toast.LENGTH_SHORT).show()
                 }
             }

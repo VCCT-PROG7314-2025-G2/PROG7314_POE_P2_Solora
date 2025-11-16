@@ -18,6 +18,21 @@
         <item name="colorOnSecondary">@android:color/white</item>
         <item name="buttonBarPositiveButtonStyle">@style/Widget.Solora.Button.TextButton</item>
         <item name="buttonBarNegativeButtonStyle">@style/Widget.Solora.Button.TextButton</item>
+        <item name="materialCalendarHeaderLayout">@style/Widget.Solora.MaterialCalendar.HeaderLayout</item>
+        <item name="materialCalendarHeaderTitle">@style/Widget.Solora.MaterialCalendar.HeaderTitle</item>
+    </style>
+    
+    <!-- Compact calendar header layout -->
+    <style name="Widget.Solora.MaterialCalendar.HeaderLayout" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
+        <item name="android:paddingTop">4dp</item>
+        <item name="android:paddingBottom">4dp</item>
+    </style>
+    
+    <!-- Compact calendar header title -->
+    <style name="Widget.Solora.MaterialCalendar.HeaderTitle" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
+        <item name="android:textSize">18sp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">4dp</item>
     </style>
     
     <!-- Orange text buttons for date picker -->
