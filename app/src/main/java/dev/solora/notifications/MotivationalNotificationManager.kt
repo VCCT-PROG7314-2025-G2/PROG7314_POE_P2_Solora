@@ -167,6 +167,13 @@ class MotivationalNotificationManager(private val context: Context) {
         }
     }
 
+    fun sendTestNotification() {
+        showLocalNotification(
+            "Solora Notifications Enabled! 🎉",
+            "You'll receive motivational messages as you add quotes and leads!"
+        )
+    }
+    
     private fun showLocalNotification(title: String, body: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         

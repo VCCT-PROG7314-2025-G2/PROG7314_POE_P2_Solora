@@ -1,6 +1,9 @@
 package dev.solora.navigation
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +13,9 @@ import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -43,6 +48,18 @@ class ProfileFragment : Fragment() {
     
     private var isInitializingToggle = false
     private var isInitializingFingerprint = false
+    
+    // Permission launcher for notifications (Android 13+)
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            enableNotificationsAfterPermission()
+        } else {
+            switchNotifications.isChecked = false
+            Toast.makeText(requireContext(), "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
     
     // UI Elements
     private lateinit var tvAvatar: TextView
@@ -299,14 +316,35 @@ class ProfileFragment : Fragment() {
     private fun handleNotificationToggle(isEnabled: Boolean) {
         if (isInitializingToggle) return
         
-        viewLifecycleOwner.lifecycleScope.launch {
-            notificationManager.enableMotivationalNotifications(isEnabled)
-
-            if (isEnabled) {
-                Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
+        if (isEnabled) {
+            // Check permission for Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                    enableNotificationsAfterPermission()
+                } else {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             } else {
+                enableNotificationsAfterPermission()
+            }
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch {
+                notificationManager.enableMotivationalNotifications(false)
                 Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    
+    private fun enableNotificationsAfterPermission() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            notificationManager.enableMotivationalNotifications(true)
+            Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
+            
+            // Send a test notification to confirm it's working
+            notificationManager.sendTestNotification()
         }
     }
     
