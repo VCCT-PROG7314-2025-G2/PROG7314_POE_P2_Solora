@@ -254,12 +254,20 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            
-            // Use update() instead of set() to only update specific fields
-            val updateData = mapOf(
+            // Update all lead fields
+            val updateData = mutableMapOf<String, Any?>(
+                "name" to lead.name,
+                "email" to lead.email,
+                "phone" to lead.phone,
+                "status" to lead.status,
+                "notes" to lead.notes,
                 "quoteId" to lead.quoteId,
+                "followUpDate" to lead.followUpDate,
                 "updatedAt" to com.google.firebase.Timestamp.now()
             )
+            
+            // Remove null values
+            updateData.entries.removeIf { it.value == null }
             
             firestore.collection("leads")
                 .document(leadId)

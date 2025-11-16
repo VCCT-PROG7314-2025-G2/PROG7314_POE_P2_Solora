@@ -166,7 +166,7 @@ class LeadsFragment : Fragment() {
     private fun setupFollowUpDatePicker() {
         etFollowUpDate.setOnClickListener {
             val datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("") // Remove title to prevent overlap
+                .setTitleText("Select Follow-up Date")
                 .setSelection(selectedFollowUpDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds())
                 .setTheme(R.style.ThemeOverlay_Solora_DatePicker)
                 .build()
