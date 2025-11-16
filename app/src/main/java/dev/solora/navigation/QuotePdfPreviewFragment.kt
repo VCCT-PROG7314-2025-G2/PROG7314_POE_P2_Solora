@@ -170,7 +170,7 @@ class QuotePdfPreviewFragment : Fragment() {
         }
         
         // Update footer thanks message
-        tvFooterThanks.text = "Thank you for choosing ${if (companySettings.companyName.isNotEmpty()) companySettings.companyName else "SOLORA"} for your solar energy needs."
+        tvFooterThanks.text = getString(R.string.footer_thanks, companySettings.companyName)
     }
     
     private fun loadQuoteData() {

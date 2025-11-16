@@ -39,7 +39,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Lead Details"
+            android:text="@string/lead_details"
             android:textColor="@android:color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
@@ -73,7 +73,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lead Name"
+                android:text="@string/lead_name"
                 android:textColor="@color/solora_orange"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -110,7 +110,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Contact Information"
+                android:text="@string/contact_information"
                 android:textColor="@color/solora_orange"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -126,7 +126,7 @@
                 <TextView
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"
-                    android:text="Email:"
+                    android:text="@string/Email"
                     android:textColor="@color/solora_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -151,7 +151,7 @@
                 <TextView
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"
-                    android:text="Phone:"
+                    android:text="@string/phone"
                     android:textColor="@color/solora_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -189,7 +189,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Lead Information"
+                android:text="@string/lead_information"
                 android:textColor="@color/solora_orange"
                 android:textSize="12sp"
                 android:textStyle="bold"
@@ -205,7 +205,7 @@
                 <TextView
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"
-                    android:text="Lead ID:"
+                    android:text="@string/lead_id"
                     android:textColor="@color/solora_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -230,7 +230,7 @@
                 <TextView
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"
-                    android:text="Created:"
+                    android:text="@string/created"
                     android:textColor="@color/solora_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -256,7 +256,7 @@
                 <TextView
                     android:layout_width="60dp"
                     android:layout_height="wrap_content"
-                    android:text="Status:"
+                    android:text="@string/status"
                     android:textColor="@color/solora_dark_grey"
                     android:textSize="12sp"
                     android:textStyle="bold" />
@@ -366,7 +366,7 @@
             android:id="@+id/btn_update_status"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:text="Update Status"
+            android:text="@string/update_status"
             android:textColor="@android:color/white"
             android:backgroundTint="@android:color/transparent"
             android:layout_marginEnd="12dp"
@@ -379,7 +379,7 @@
             android:id="@+id/btn_close_lead_details_action"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:text="Close"
+            android:text="@string/close"
             android:textColor="@color/solora_orange"
             android:backgroundTint="@android:color/white"
             android:minWidth="90dp"

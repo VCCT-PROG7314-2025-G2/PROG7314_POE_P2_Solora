@@ -81,7 +81,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="System"
+                    android:text="@string/system"
                     android:textSize="10sp"
                     android:textColor="#999999" />
 
@@ -104,7 +104,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Monthly Savings"
+                    android:text="@string/monthly_savings"
                     android:textSize="10sp"
                     android:textColor="#999999" />
 

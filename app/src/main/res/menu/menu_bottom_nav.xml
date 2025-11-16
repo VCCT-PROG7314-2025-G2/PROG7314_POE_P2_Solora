@@ -2,19 +2,19 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/homeFragment"
-        android:title="Home"
+        android:title="@string/nav_home"
         android:icon="@drawable/home_icon_selector" />
     <item
         android:id="@+id/quotesFragment"
-        android:title="Quotes"
+        android:title="@string/nav_quotes"
         android:icon="@drawable/quote_icon_selector" />
     <item
         android:id="@+id/leadsFragment"
-        android:title="Leads"
+        android:title="@string/nav_leads"
         android:icon="@drawable/leads_icon_selector" />
     <item
         android:id="@+id/profileFragment"
-        android:title="Profile"
+        android:title="@string/nav_profile"
         android:icon="@drawable/profile_icon_selector" />
 </menu>
 

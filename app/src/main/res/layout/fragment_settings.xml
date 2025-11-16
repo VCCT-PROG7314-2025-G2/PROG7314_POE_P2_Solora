@@ -42,7 +42,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="Settings"
+                    android:text="@string/settings_title"
                     android:textColor="@android:color/white"
                     android:textSize="@dimen/text_size_title"
                     android:textStyle="bold" />
@@ -51,7 +51,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Configure calculation constants and company information"
+                android:text="@string/settings_subtitle"
                 android:textColor="@android:color/white"
                 android:textSize="14sp"
                 android:alpha="0.9"
@@ -71,7 +71,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Calculation"
+                android:text="@string/tab_calculation"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:padding="12dp"
@@ -85,7 +85,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Company"
+                android:text="@string/tab_company"
                 android:textColor="@android:color/white"
                 android:alpha="0.7"
                 android:padding="12dp"
@@ -121,7 +121,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Basic Constants"
+                        android:text="@string/basic_constants"
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:layout_marginBottom="16dp" />
@@ -129,7 +129,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Default Tariff"
+                        android:hint="@string/default_tariff"
                         android:layout_marginBottom="12dp"
                         app:suffixText="R/kWh"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -145,7 +145,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Default Panel Size"
+                        android:hint="@string/default_panel_size"
                         android:layout_marginBottom="12dp"
                         app:suffixText="W"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -161,9 +161,9 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Default Sun Hours"
+                        android:hint="@string/default_sun_hours"
                         android:layout_marginBottom="12dp"
-                        app:suffixText="hours/day"
+                        app:suffixText="@string/suffix_hours_per_day"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                         
                         <com.google.android.material.textfield.TextInputEditText
@@ -194,7 +194,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cost Constants"
+                        android:text="@string/cost_constants"
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:layout_marginBottom="16dp" />
@@ -202,7 +202,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Panel Cost"
+                        android:hint="@string/panel_cost"
                         android:layout_marginBottom="12dp"
                         app:prefixText="R "
                         app:suffixText="/W"
@@ -219,7 +219,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Inverter Cost"
+                        android:hint="@string/inverter_cost"
                         android:layout_marginBottom="12dp"
                         app:prefixText="R "
                         app:suffixText="/W"
@@ -236,7 +236,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Installation Cost"
+                        android:hint="@string/installation_cost"
                         android:layout_marginBottom="12dp"
                         app:prefixText="R "
                         app:suffixText="/kW"
@@ -270,7 +270,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Performance Constants"
+                        android:text="@string/performance_constants"
                         android:textStyle="bold"
                         android:textSize="18sp"
                         android:layout_marginBottom="16dp" />
@@ -278,7 +278,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Panel Efficiency"
+                        android:hint="@string/panel_efficiency"
                         android:layout_marginBottom="12dp"
                         app:suffixText="%"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -294,7 +294,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Performance Ratio"
+                        android:hint="@string/performance_ratio"
                         android:layout_marginBottom="12dp"
                         app:suffixText="%"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -310,7 +310,7 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Inverter Sizing Ratio"
+                        android:hint="@string/inverter_sizing_ratio"
                         android:layout_marginBottom="12dp"
                         app:suffixText="%"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -326,9 +326,9 @@
                     <com.google.android.material.textfield.TextInputLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="System Lifetime"
+                        android:hint="@string/system_lifetime"
                         android:layout_marginBottom="12dp"
-                        app:suffixText="years"
+                        app:suffixText="@string/suffix_years"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                         
                         <com.google.android.material.textfield.TextInputEditText
@@ -536,7 +536,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginBottom="12dp"
-                android:text="Save Settings"
+                android:text="@string/save_settings"
                 android:textSize="16sp"
                 android:textStyle="bold"
                 android:backgroundTint="@color/solora_orange"
@@ -553,7 +553,7 @@
                 android:id="@+id/btn_reset_settings"
                 android:layout_width="match_parent"
                 android:layout_height="48dp"
-                android:text="Reset to Defaults"
+                android:text="@string/reset_defaults"
                 android:textSize="14sp"
                 android:backgroundTint="@android:color/darker_gray"
                 android:textColor="@android:color/white"

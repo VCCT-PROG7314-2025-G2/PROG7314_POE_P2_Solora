@@ -1,5 +1,6 @@
 package dev.solora
 
+import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
@@ -7,6 +8,7 @@ import dev.solora.api.FirebaseFunctionsApi
 import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.launch
 import android.util.Log
+import dev.solora.profile.LocaleHelper
 
 // This is the main activity that starts when the app opens
 // It checks if everything is working and then shows the main app
@@ -14,7 +16,15 @@ class MainActivity : FragmentActivity() {
     
     private val firebaseRepository = FirebaseRepository()
     private val apiService = FirebaseFunctionsApi()
-    
+
+    override fun attachBaseContext(newBase: Context) {
+        val sharedPrefs = newBase.getSharedPreferences("Settings", Context.MODE_PRIVATE)
+        val lang = sharedPrefs.getString("My_Lang", "en") ?: "en"
+        val context = LocaleHelper.setLocale(newBase, lang)
+        super.attachBaseContext(context)
+    }
+
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)

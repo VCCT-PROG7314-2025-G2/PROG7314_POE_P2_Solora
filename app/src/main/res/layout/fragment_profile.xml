@@ -119,13 +119,13 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Edit Profile"
+                        android:text="@string/edit_profile"
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
                     <ImageView
                         android:layout_width="16dp"
-                        android:layout_height="16dp"
+                        android:layout_height="11dp"
                         android:src="@android:drawable/ic_media_next"
                         android:tint="#666666" />
 
@@ -160,7 +160,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Change Password"
+                        android:text="@string/change_password"
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
@@ -201,7 +201,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Fingerprint Login"
+                        android:text="@string/authentication"
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
@@ -242,7 +242,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Language"
+                        android:text="@string/language"
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
@@ -283,7 +283,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Push-notifications"
+                        android:text="@string/push_notifications"
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
@@ -339,7 +339,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Logout"
+                                android:text="@string/logout"
                                 android:textColor="#D32F2F"
                                 android:textSize="16sp"
                                 android:textStyle="bold" />
@@ -347,7 +347,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Sign out of your account"
+                                android:text="@string/sign_out_description"
                                 android:textColor="#666666"
                                 android:textSize="12sp"
                                 android:layout_marginTop="2dp" />

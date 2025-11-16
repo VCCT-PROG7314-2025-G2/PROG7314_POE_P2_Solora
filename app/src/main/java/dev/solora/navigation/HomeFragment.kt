@@ -169,7 +169,7 @@ class HomeFragment : Fragment() {
         } else {
             "Not Set"
         }
-        tvConsultantName.text = "Welcome back, $fullName"
+        tvConsultantName.text = getString(R.string.welcome_back, fullName)
     }
     
     private fun loadRecentQuotes() {
@@ -410,22 +410,23 @@ class HomeFragment : Fragment() {
             gravity = android.view.Gravity.CENTER
             setPadding(32, 32, 32, 32)
         }
-        
+
         val emptyText = TextView(requireContext()).apply {
-            text = "No quotes from last 7 days"
+            text = getString(R.string.no_quotes_last_7_days)
             textSize = 14f
             setTextColor(android.graphics.Color.parseColor("#666666"))
             gravity = android.view.Gravity.CENTER
         }
-        
+
         val subText = TextView(requireContext()).apply {
-            text = "Create a new quote to see it here"
+            text = getString(R.string.create_new_quote_here)
             textSize = 12f
             setTextColor(android.graphics.Color.parseColor("#999999"))
             gravity = android.view.Gravity.CENTER
             setPadding(0, 8, 0, 0)
         }
-        
+
+
         emptyView.addView(emptyText)
         emptyView.addView(subText)
         layoutRecentQuotes.addView(emptyView)

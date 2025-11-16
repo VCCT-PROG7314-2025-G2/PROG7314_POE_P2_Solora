@@ -93,7 +93,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Solar Solutions"
+                        android:text="@string/company_subtitle"
                         android:textColor="#666666"
                         android:textSize="14sp"
                         android:layout_marginBottom="16dp" />
@@ -103,7 +103,7 @@
                         android:id="@+id/tv_consultant_name"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Welcome back, John Smith"
+                        android:text=""
                         android:textColor="@android:color/black"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -136,7 +136,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Total Leads"
+                                android:text="@string/total_leads"
                                 android:textColor="#666666"
                                 android:textSize="11sp" />
 
@@ -167,7 +167,7 @@
                             <TextView
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:text="Total Quotes"
+                                android:text="@string/total_quotes"
                                 android:textColor="#666666"
                                 android:textSize="11sp" />
 
@@ -216,7 +216,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Calculate Quote"
+                            android:text="@string/calculate_quote"
                             android:textColor="@android:color/black"
                             android:textSize="14sp"
                             android:textStyle="bold"
@@ -226,7 +226,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Create new solar quotes"
+                            android:text="@string/create_new_solar_quotes"
                             android:textColor="#666666"
                             android:textSize="11sp"
                             android:gravity="center" />
@@ -265,7 +265,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Add Leads"
+                            android:text="@string/add_lead"
                             android:textColor="@android:color/black"
                             android:textSize="14sp"
                             android:textStyle="bold"
@@ -275,7 +275,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Manage potential clients"
+                            android:text="@string/manage_potential_clients"
                             android:textColor="#666666"
                             android:textSize="11sp"
                             android:gravity="center" />
@@ -303,7 +303,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Recent Quotes"
+                        android:text="@string/recent_quotes"
                         android:textColor="@android:color/black"
                         android:textSize="16sp"
                         android:textStyle="bold"

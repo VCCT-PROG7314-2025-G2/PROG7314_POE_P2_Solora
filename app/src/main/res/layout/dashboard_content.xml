@@ -25,7 +25,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Dashboard"
+                android:text="@string/dashboard"
                 android:textColor="@color/solora_orange"
                 android:textSize="28sp"
                 android:textStyle="bold" />
@@ -33,7 +33,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Analytics Overview"
+                android:text="@string/analytics_overview"
                 android:textColor="#666666"
                 android:textSize="14sp" />
 
@@ -75,7 +75,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Quotes"
+                        android:text="@string/total_quotes"
                         android:textColor="#666666"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
@@ -112,7 +112,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Avg System Size"
+                        android:text="@string/avg_system_size"
                         android:textColor="#666666"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
@@ -158,7 +158,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Total Revenue"
+                        android:text="@string/total_revenue"
                         android:textColor="#666666"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
@@ -195,7 +195,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Avg Monthly Savings"
+                        android:text="@string/avg_monthly_savings"
                         android:textColor="#666666"
                         android:textSize="12sp"
                         android:layout_marginTop="4dp" />
@@ -284,7 +284,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="From Date"
+                                    android:text="@string/from_date"
                                     android:textSize="12sp"
                                     android:textColor="#666666"
                                     android:textStyle="bold"
@@ -304,7 +304,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="48dp"
                                         android:padding="12dp"
-                                        android:text="Select Date"
+                                        android:text="@string/select_date"
                                         android:textColor="@android:color/black"
                                         android:textSize="14sp"
                                         android:gravity="center_vertical"
@@ -339,7 +339,7 @@
                                 <TextView
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
-                                    android:text="To Date"
+                                    android:text="@string/to_date"
                                     android:textSize="12sp"
                                     android:textColor="#666666"
                                     android:textStyle="bold"
@@ -359,7 +359,7 @@
                                         android:layout_width="match_parent"
                                         android:layout_height="48dp"
                                         android:padding="12dp"
-                                        android:text="Select Date"
+                                        android:text="@string/select_date"
                                         android:textColor="@android:color/black"
                                         android:textSize="14sp"
                                         android:gravity="center_vertical"
@@ -383,7 +383,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="System Size Distribution"
+                    android:text="@string/system_size_distribution"
                     android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"
@@ -559,7 +559,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="This Month"
+                            android:text="@string/this_month"
                             android:textColor="#666666"
                             android:textSize="12sp"
                             android:layout_marginTop="4dp" />
@@ -584,7 +584,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Last Month"
+                            android:text="@string/last_month"
                             android:textColor="#666666"
                             android:textSize="12sp"
                             android:layout_marginTop="4dp" />
@@ -610,7 +610,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Growth"
+                            android:text="@string/growth"
                             android:textColor="#666666"
                             android:textSize="12sp"
                             android:layout_marginTop="4dp" />
@@ -640,7 +640,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Top Locations"
+                    android:text="@string/top_locations"
                     android:textColor="@android:color/black"
                     android:textSize="18sp"
                     android:textStyle="bold"

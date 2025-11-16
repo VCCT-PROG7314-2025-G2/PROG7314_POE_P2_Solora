@@ -27,7 +27,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Calculate Quote Page"
+            android:text="@string/calculate_quote_page"
             android:textColor="@android:color/white"
             android:textSize="@dimen/text_size_title"
             android:textStyle="bold"
@@ -63,7 +63,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Quote Information"
+                        android:text="@string/quote_information"
                         android:textColor="@color/solora_orange"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -86,7 +86,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Number of Panels"
+                                android:text="@string/number_of_panels"
                                 android:textSize="16sp" />
 
                             <TextView
@@ -108,7 +108,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Total System Size"
+                                android:text="@string/total_system_size_label"
                                 android:textSize="16sp" />
 
                             <TextView
@@ -130,7 +130,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Recommended Inverter Size"
+                                android:text="@string/recommended_inverter_size"
                                 android:textSize="16sp" />
 
                             <TextView
@@ -158,7 +158,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="1"
-                                android:text="Estimated Monthly Savings"
+                                android:text="@string/estimated_monthly_saving"
                                 android:textSize="16sp" />
 
                             <TextView
@@ -182,7 +182,7 @@
                 android:id="@+id/btn_save_quote"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Save Quote"
+                android:text="@string/save_quote"
                 android:textColor="@android:color/white"
                 android:textSize="16sp"
                 android:textStyle="bold"

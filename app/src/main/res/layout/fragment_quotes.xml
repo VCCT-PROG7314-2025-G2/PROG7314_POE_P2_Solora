@@ -35,7 +35,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Solar Quotes"
+                android:text="@string/solar_quotes"
                 android:textColor="@android:color/white"
                 android:textSize="@dimen/text_size_title"
                 android:textStyle="bold"
@@ -55,7 +55,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Calculate"
+                android:text="@string/calculate"
                 android:textColor="@android:color/white"
                 android:textStyle="bold"
                 android:textSize="14sp"
@@ -70,7 +70,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="View Quotes"
+                android:text="@string/view_quotes"
                 android:textColor="@android:color/white"
                 android:alpha="0.7"
                 android:textSize="14sp"
@@ -85,7 +85,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Dashboard"
+                android:text="@string/dashboard"
                 android:textColor="@android:color/white"
                 android:alpha="0.7"
                 android:textSize="14sp"
@@ -141,7 +141,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Calculate Quote"
+                            android:text="@string/calculate_quote"
                             android:textStyle="bold"
                             android:textSize="18sp"
                             android:layout_marginBottom="16dp" />
@@ -149,7 +149,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Address"
+                            android:hint="@string/address"
                             android:layout_marginBottom="12dp"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
                             
@@ -162,7 +162,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Monthly Usage"
+                            android:hint="@string/monthly_usage"
                             android:layout_marginBottom="12dp"
                             app:suffixText="kWh"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -177,7 +177,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Monthly Bill"
+                            android:hint="@string/monthly_bill"
                             android:layout_marginBottom="12dp"
                             app:prefixText="R "
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -192,7 +192,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Tariff"
+                            android:hint="@string/tariff"
                             android:layout_marginBottom="12dp"
                             app:suffixText="R/kWh"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -208,7 +208,7 @@
                         <com.google.android.material.textfield.TextInputLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:hint="Panel Size"
+                            android:hint="@string/panel_size"
                             android:layout_marginBottom="16dp"
                             app:suffixText="W"
                             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox">
@@ -225,7 +225,7 @@
                             android:id="@+id/btn_calculate"
                             android:layout_width="match_parent"
                             android:layout_height="56dp"
-                            android:text="calculate"
+                            android:text="@string/calculate_button"
                             android:backgroundTint="@color/solora_orange"
                             android:textColor="@android:color/white"
                             android:textAllCaps="false"

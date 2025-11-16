@@ -159,7 +159,7 @@ class QuoteDetailFragment : Fragment() {
         } else {
             "REF-${quote.id?.takeLast(5) ?: "00000"}"
         }
-        tvQuoteReference.text = "Ref no. $reference"
+        tvQuoteReference.text = getString(R.string.reference_number_with_value, reference)
         
         // Client details
         tvClientName.text = quote.clientName.ifEmpty { "Temporary Client" }

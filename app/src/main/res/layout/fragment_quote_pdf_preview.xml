@@ -29,7 +29,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Quote Preview"
+            android:text="@string/quote_preview"
             android:textColor="@android:color/white"
             android:textSize="@dimen/text_size_title"
             android:textStyle="bold"
@@ -93,7 +93,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Solar Solutions"
+                            android:text="@string/company_subtitle"
                             android:textColor="@color/solora_on_surface"
                             android:textSize="14sp"
                             android:layout_marginTop="4dp" />
@@ -104,7 +104,7 @@
                         android:id="@+id/tv_reference"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Ref no. QUOTE-12345"
+                        android:text=""
                         android:textColor="@color/solora_orange"
                         android:textSize="16sp"
                         android:textStyle="bold" />
@@ -130,7 +130,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Client Information"
+                        android:text="@string/client_information"
                         android:textColor="@color/solora_on_surface"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -145,7 +145,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Name:"
+                            android:text="@string/label_name"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -168,7 +168,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Address:"
+                            android:text="@string/label_address"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -190,7 +190,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Date:"
+                            android:text="@string/label_date"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -225,7 +225,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="System Specifications"
+                        android:text="@string/system_specifications"
                         android:textColor="@color/solora_on_surface"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -240,7 +240,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Monthly Savings:"
+                            android:text="@string/monthly_savings"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -264,7 +264,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Panels:"
+                            android:text="@string/panels"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -287,7 +287,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="System Size:"
+                            android:text="@string/system_size"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -310,7 +310,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Inverter:"
+                            android:text="@string/inverter"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -332,7 +332,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Coverage:"
+                            android:text="@string/coverage"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -367,7 +367,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Cost Breakdown"
+                        android:text="@string/cost_breakdown"
                         android:textColor="@color/solora_on_surface"
                         android:textSize="18sp"
                         android:textStyle="bold"
@@ -382,7 +382,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="System Cost:"
+                            android:text="@string/label_system_cost"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -405,7 +405,7 @@
                         <TextView
                             android:layout_width="120dp"
                             android:layout_height="wrap_content"
-                            android:text="Tax:"
+                            android:text="@string/label_tax"
                             android:textColor="@color/solora_on_surface"
                             android:textStyle="bold" />
 
@@ -431,7 +431,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total:"
+                            android:text="@string/label_total"
                             android:textColor="@color/solora_on_surface"
                             android:textSize="16sp"
                             android:textStyle="bold" />
@@ -536,7 +536,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Quote Information"
+                            android:text="@string/quote_information"
                             android:textColor="@color/solora_orange"
                             android:textSize="16sp"
                             android:textStyle="bold"
@@ -597,7 +597,7 @@
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Quote Validity: This quote is valid for 30 days from the date of issue."
+                        android:text="@string/quote_validity"
                         android:textColor="@color/solora_dark_grey"
                         android:textSize="13sp"
                         android:gravity="center"
@@ -618,7 +618,7 @@
                         android:id="@+id/tv_footer_thanks"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Thank you for choosing SOLORA for your solar energy needs."
+                        android:text=""
                         android:textColor="@color/solora_dark_grey"
                         android:textSize="12sp"
                         android:gravity="center"
@@ -633,7 +633,7 @@
                 android:id="@+id/btn_share_pdf"
                 android:layout_width="match_parent"
                 android:layout_height="64dp"
-                android:text="Share PDF"
+                android:text="@string/share_pdf"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"

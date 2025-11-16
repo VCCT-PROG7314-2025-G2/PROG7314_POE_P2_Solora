@@ -27,7 +27,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Calculate Quote Page"
+            android:text="@string/calculate_quote_page"
             android:textColor="@android:color/white"
             android:textSize="@dimen/text_size_title"
             android:textStyle="bold"
@@ -70,7 +70,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Quote Information"
+                        android:text="@string/quote_information"
                         android:textColor="@color/solora_orange"
                         android:textSize="20sp"
                         android:textStyle="bold"
@@ -82,7 +82,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="20dp"
-                        android:hint="Select Existing Client"
+                        android:hint="@string/select_existing_client"
                         app:endIconMode="dropdown_menu"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
@@ -101,7 +101,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Client Details"
+                        android:text="@string/client_details"
                         android:textSize="16sp"
                         android:textStyle="bold"
                         android:textColor="#333333"
@@ -113,7 +113,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:hint="Reference Number"
+                        android:hint="@string/reference_number_hint"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
 
@@ -133,7 +133,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:hint="First Name"
+                        android:hint="@string/first_name"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
 
@@ -151,7 +151,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:hint="Last Name"
+                        android:hint="@string/last_name"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
 
@@ -169,7 +169,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:hint="Address"
+                        android:hint="@string/address_hint"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
 
@@ -187,7 +187,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="16dp"
-                        android:hint="Email"
+                        android:hint="@string/email"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
 
@@ -205,7 +205,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginBottom="0dp"
-                        android:hint="Contact Number"
+                        android:hint="@string/contact_number"
                         app:boxStrokeColor="@color/solora_orange"
                         app:hintTextColor="@color/solora_orange">
 
@@ -239,7 +239,7 @@
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:text="Quote Summary"
+                        android:text="@string/quote_summary"
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#333333"
@@ -257,7 +257,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Number of Panels"
+                            android:text="@string/number_of_panels_label"
                             android:textSize="15sp"
                             android:textColor="#666666" />
 
@@ -281,7 +281,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Total System Size"
+                            android:text="@string/total_system_size_label"
                             android:textSize="15sp"
                             android:textColor="#666666" />
 
@@ -305,7 +305,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Recommended Inverter"
+                            android:text="@string/recommended_inverter_label"
                             android:textSize="15sp"
                             android:textColor="#666666" />
 
@@ -329,7 +329,7 @@
                             android:layout_width="0dp"
                             android:layout_height="wrap_content"
                             android:layout_weight="1"
-                            android:text="Estimated Monthly Savings"
+                            android:text="@string/estimated_monthly_savings_label"
                             android:textSize="15sp"
                             android:textColor="#666666" />
 
@@ -351,7 +351,7 @@
                 android:id="@+id/btn_save_quote_final"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:text="Save Quote"
+                android:text="@string/save_quote"
                 android:textColor="@android:color/white"
                 android:textSize="18sp"
                 android:textStyle="bold"

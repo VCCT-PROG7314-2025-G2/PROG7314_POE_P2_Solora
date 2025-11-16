@@ -46,7 +46,7 @@ class QuotesFragment : Fragment() {
     private var isFirebaseTest = false
     private var currentTab = 0 // 0: calculate, 1: view, 2: dashboard
     // This keeps track of which tab the user is on
-    
+
     // UI Elements
     private lateinit var tabCalculate: TextView
     private lateinit var tabView: TextView
@@ -55,20 +55,20 @@ class QuotesFragment : Fragment() {
     private lateinit var contentView: View
     private lateinit var contentDashboard: View
     private lateinit var btnBackQuotes: ImageButton
-    
+
     // Dashboard elements
     private lateinit var dashboardContent: View
-    
+
     // Date Filter Elements
     private lateinit var tvDateFilterFrom: TextView
     private lateinit var tvDateFilterTo: TextView
     private lateinit var btnClearDateFilter: ImageButton
-    
+
     // Date Filter Variables
     private var fromDate: Date? = null
     private var toDate: Date? = null
     private val dateFormat = SimpleDateFormat("MMM dd", Locale.getDefault())
-    
+
     // Calculate tab elements
     private lateinit var etAddress: TextInputEditText
     private lateinit var etUsage: TextInputEditText
@@ -76,12 +76,12 @@ class QuotesFragment : Fragment() {
     private lateinit var etTariff: TextInputEditText
     private lateinit var etPanel: TextInputEditText
     private lateinit var btnCalculate: Button
-    
+
     // View tab elements (quotes list)
     private lateinit var rvQuotesList: androidx.recyclerview.widget.RecyclerView
     private lateinit var layoutEmptyQuotes: View
     private lateinit var quotesAdapter: QuotesListAdapter
-    
+
     // Dashboard tab elements
     private lateinit var etReference: TextInputEditText
     private lateinit var etFirstName: TextInputEditText
@@ -91,14 +91,14 @@ class QuotesFragment : Fragment() {
     private lateinit var etContact: TextInputEditText
     private lateinit var tvQuoteSummary: TextView
     private lateinit var btnSaveFinalQuote: Button
-    
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_quotes, container, false)
     }
-    
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
         initializeViews(view)
         setupTabs()
         setupCalculateTab()
@@ -107,7 +107,7 @@ class QuotesFragment : Fragment() {
         observeViewModel()
         observeSettings()
         observeDashboard()
-        
+
         // Check if we have a show_tab argument
         val showTab = arguments?.getInt("show_tab", 0) ?: 0
         if (showTab > 0) {
@@ -117,7 +117,7 @@ class QuotesFragment : Fragment() {
         } else {
             // Check if we're returning from client details (quote was saved)
             checkIfReturningFromQuoteSave()
-            
+
             // Also check immediately if we should show view tab
             val savedQuote = quotesViewModel.lastQuote.value
             if (savedQuote != null && savedQuote.id != null) {
@@ -127,24 +127,24 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     private fun initializeViews(view: View) {
         // Tab views
         tabCalculate = view.findViewById(R.id.tab_calculate)
         tabView = view.findViewById(R.id.tab_view)
         tabDashboard = view.findViewById(R.id.tab_dashboard)
-        
+
         // Content views
         contentCalculate = view.findViewById(R.id.content_calculate)
         contentView = view.findViewById(R.id.content_view)
         contentDashboard = view.findViewById(R.id.content_dashboard)
-        
+
         // Back button
         btnBackQuotes = view.findViewById(R.id.btn_back_quotes)
-        
+
         // Dashboard content
         dashboardContent = LayoutInflater.from(requireContext()).inflate(R.layout.dashboard_content, null)
-        
+
         // Calculate tab elements
         etAddress = view.findViewById(R.id.et_address)
         etUsage = view.findViewById(R.id.et_usage)
@@ -152,13 +152,13 @@ class QuotesFragment : Fragment() {
         etTariff = view.findViewById(R.id.et_tariff)
         etPanel = view.findViewById(R.id.et_panel)
         btnCalculate = view.findViewById(R.id.btn_calculate)
-        
+
         // View tab elements (quotes list)
         rvQuotesList = view.findViewById(R.id.rv_quotes_list)
         layoutEmptyQuotes = view.findViewById(R.id.layout_empty_quotes)
-        
+
         // Date Filter Elements (will be initialized in setupDashboardTab after dashboard content is loaded)
-        
+
         // Dashboard tab elements
         etReference = view.findViewById(R.id.et_reference)
         etFirstName = view.findViewById(R.id.et_first_name)
@@ -169,7 +169,7 @@ class QuotesFragment : Fragment() {
         tvQuoteSummary = view.findViewById(R.id.tv_quote_summary)
         btnSaveFinalQuote = view.findViewById(R.id.btn_save_final_quote)
     }
-    
+
     private fun setupTabs() {
         // Back button click listener
         btnBackQuotes.setOnClickListener {
@@ -189,27 +189,27 @@ class QuotesFragment : Fragment() {
                 findNavController().navigate(R.id.homeFragment)
             }
         }
-        
+
         tabCalculate.setOnClickListener { switchToTab(0) }
         tabView.setOnClickListener { switchToTab(1) }
         tabDashboard.setOnClickListener { switchToTab(2) }
-        
+
         // Initially show calculate tab
         switchToTab(0)
     }
-    
+
     private fun switchToTab(tab: Int) {
         currentTab = tab
-        
+
         // Update tab appearance
         updateTabAppearance()
-        
+
         // Show/hide content
         contentCalculate.visibility = if (tab == 0) View.VISIBLE else View.GONE
         contentView.visibility = if (tab == 1) View.VISIBLE else View.GONE
         contentDashboard.visibility = if (tab == 2) View.VISIBLE else View.GONE
     }
-    
+
     private fun navigateToQuoteResults(outputs: dev.solora.quote.QuoteOutputs, address: String) {
         val bundle = Bundle().apply {
             putSerializable("calculation_outputs", outputs)
@@ -217,7 +217,7 @@ class QuotesFragment : Fragment() {
         }
         findNavController().navigate(R.id.quoteResultsFragment, bundle)
     }
-    
+
     private fun checkIfReturningFromQuoteSave() {
         // Check if we have a saved quote (indicates we just returned from saving a quote)
         viewLifecycleOwner.lifecycleScope.launch {
@@ -230,10 +230,10 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     override fun onResume() {
         super.onResume()
-        
+
         // Check if we have a show_tab argument first
         val showTab = arguments?.getInt("show_tab", 0) ?: 0
         if (showTab > 0) {
@@ -241,7 +241,7 @@ class QuotesFragment : Fragment() {
             // OnResume: Tab already set by argument ($showTab), not overriding
             return
         }
-        
+
         // Check if we should switch to view tab when returning from client details
         val savedQuote = quotesViewModel.lastQuote.value
         if (savedQuote != null && savedQuote.id != null) {
@@ -254,10 +254,10 @@ class QuotesFragment : Fragment() {
             // OnResume: No saved quote, switching to calculate tab
         }
     }
-    
+
     override fun onStart() {
         super.onStart()
-        
+
         // Check if we have a show_tab argument first
         val showTab = arguments?.getInt("show_tab", 0) ?: 0
         if (showTab > 0) {
@@ -265,7 +265,7 @@ class QuotesFragment : Fragment() {
             // OnStart: Tab already set by argument ($showTab), not overriding
             return
         }
-        
+
         // Also check on start in case onResume doesn't catch it
         val savedQuote = quotesViewModel.lastQuote.value
         if (savedQuote != null && savedQuote.id != null) {
@@ -274,17 +274,17 @@ class QuotesFragment : Fragment() {
             // OnStart: Switching to view tab to show saved quote: ${savedQuote.reference}
         }
     }
-    
+
     private fun updateTabAppearance() {
         // Reset all tabs
         tabCalculate.alpha = 0.7f
         tabView.alpha = 0.7f
         tabDashboard.alpha = 0.7f
-        
+
         tabCalculate.setBackgroundResource(R.drawable.tab_unselected)
         tabView.setBackgroundResource(R.drawable.tab_unselected)
         tabDashboard.setBackgroundResource(R.drawable.tab_unselected)
-        
+
         // Highlight current tab
         when (currentTab) {
             0 -> {
@@ -301,21 +301,21 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     private fun setupCalculateTab() {
         // Add NASA API test on long press
         btnCalculate.setOnLongClickListener {
             testNasaApi()
             true
         }
-        
+
         btnCalculate.setOnClickListener {
             val address = etAddress.text.toString().trim()
             val usageText = etUsage.text.toString().trim()
             val billText = etBill.text.toString().trim()
             val tariffText = etTariff.text.toString().trim()
             val panelText = etPanel.text.toString().trim()
-            
+
             // Basic validation
             if (address.isEmpty()) {
                 Toast.makeText(requireContext(), "Please enter address", Toast.LENGTH_SHORT).show()
@@ -325,19 +325,19 @@ class QuotesFragment : Fragment() {
                 Toast.makeText(requireContext(), "Please enter either monthly usage or bill", Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            
+
             try {
                 // Get current settings for defaults
                 val currentSettings = settingsViewModel.settings.value
                 // Calculate clicked - Using settings: Tariff=${currentSettings.calculationSettings.defaultTariff}, Panel=${currentSettings.calculationSettings.defaultPanelWatt}W
-                
+
                 val usage = if (usageText.isNotEmpty()) usageText.toDouble() else null
                 val bill = if (billText.isNotEmpty()) billText.toDouble() else null
                 val tariff = if (tariffText.isNotEmpty()) tariffText.toDouble() else currentSettings.calculationSettings.defaultTariff
                 val panelWatt = if (panelText.isNotEmpty()) panelText.toInt() else currentSettings.calculationSettings.defaultPanelWatt
-                
+
                 // Final calculation values: Tariff=$tariff, PanelWatt=$panelWatt
-                
+
                 // Use temporary values for reference and client name during calculation
                 quotesViewModel.calculateAdvanced(
                     reference = "TEMP-${System.currentTimeMillis()}",
@@ -353,20 +353,20 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     private fun setupViewTab() {
         // Setup RecyclerView
         quotesAdapter = QuotesListAdapter(
             onQuoteClick = { quote ->
                 // Navigate to quote detail page
                 // Quote clicked: ID=${quote.id}, Reference=${quote.reference}
-                
+
                 if (quote.id.isNullOrBlank()) {
                     // ERROR: Quote ID is null or blank!
                     Toast.makeText(requireContext(), "Error: Quote ID is missing", Toast.LENGTH_SHORT).show()
                     return@QuotesListAdapter
                 }
-                
+
                 val bundle = Bundle().apply { putString("id", quote.id) }
                 findNavController().navigate(R.id.quoteDetailFragment, bundle)
             },
@@ -377,13 +377,13 @@ class QuotesFragment : Fragment() {
         )
         rvQuotesList.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext())
         rvQuotesList.adapter = quotesAdapter
-        
+
         // Observe quotes from ViewModel
         viewLifecycleOwner.lifecycleScope.launch {
             try {
                 quotesViewModel.quotes.collect { quotes ->
                     // Quotes updated: ${quotes.size} quotes
-                    
+
                     if (quotes.isEmpty()) {
                         layoutEmptyQuotes.visibility = View.VISIBLE
                         rvQuotesList.visibility = View.GONE
@@ -402,14 +402,14 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     private fun showQuotePreviewDialog(quote: dev.solora.data.FirebaseQuote) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_quote_preview, null)
-        
+
         // Set quote data
         val address = quote.address.ifEmpty { "Address not available" }
         val systemSize = if (quote.systemKwp > 0) "${String.format("%.1f", quote.systemKwp)} kW" else "Not available"
-        
+
         // Calculate estimated total cost based on system size (rough estimate: R8500 per kW)
         val totalCost = if (quote.systemKwp > 0) {
             val estimatedCost = quote.systemKwp * 8500
@@ -417,26 +417,26 @@ class QuotesFragment : Fragment() {
         } else {
             "Not available"
         }
-        
+
         dialogView.findViewById<TextView>(R.id.tv_preview_address).text = address
         dialogView.findViewById<TextView>(R.id.tv_preview_system_size).text = systemSize
         dialogView.findViewById<TextView>(R.id.tv_preview_total_cost).text = totalCost
-        
+
         // Create and show dialog
         val dialog = MaterialAlertDialogBuilder(requireContext())
             .setView(dialogView)
             .setCancelable(true)
             .create()
-        
+
         // Set up button click listeners
         dialogView.findViewById<ImageButton>(R.id.btn_close).setOnClickListener {
             dialog.dismiss()
         }
-        
+
         dialogView.findViewById<Button>(R.id.btn_close_dialog).setOnClickListener {
             dialog.dismiss()
         }
-        
+
         dialogView.findViewById<Button>(R.id.btn_view_full).setOnClickListener {
             dialog.dismiss()
             // Navigate to full quote detail
@@ -445,11 +445,11 @@ class QuotesFragment : Fragment() {
                 findNavController().navigate(R.id.quoteDetailFragment, bundle)
             }
         }
-        
+
         dialog.show()
         // Quote preview dialog shown for: $address
     }
-    
+
     private fun setupDashboardTab() {
         // Clear existing content and add dashboard
         val viewGroup = contentDashboard as? ViewGroup
@@ -457,15 +457,15 @@ class QuotesFragment : Fragment() {
             it.removeAllViews()
             it.addView(dashboardContent)
         }
-        
+
         // Initialize dashboard UI elements
         initializeDashboardViews()
-        
+
         // Initialize date filter elements from dashboard content
         tvDateFilterFrom = dashboardContent.findViewById(R.id.tv_date_filter_from)
         tvDateFilterTo = dashboardContent.findViewById(R.id.tv_date_filter_to)
         btnClearDateFilter = dashboardContent.findViewById(R.id.btn_clear_date_filter)
-        
+
         // Setup date filter click listeners
         tvDateFilterFrom.setOnClickListener {
             showDatePicker { date ->
@@ -474,7 +474,7 @@ class QuotesFragment : Fragment() {
                 applyDateFilterToDashboard()
             }
         }
-        
+
         tvDateFilterTo.setOnClickListener {
             showDatePicker { date ->
                 toDate = date
@@ -482,27 +482,27 @@ class QuotesFragment : Fragment() {
                 applyDateFilterToDashboard()
             }
         }
-        
+
         btnClearDateFilter.setOnClickListener {
             clearDateFilterDashboard()
         }
-        
+
         // Load dashboard data when tab is shown
         dashboardViewModel.loadDashboardData()
     }
-    
+
     private fun initializeDashboardViews() {
         // Statistics cards
         // These will be populated by observeDashboard()
     }
-    
+
     private fun observeDashboard() {
         viewLifecycleOwner.lifecycleScope.launch {
             dashboardViewModel.dashboardData.collect { dashboardData ->
                 updateDashboardUI(dashboardData)
             }
         }
-        
+
         viewLifecycleOwner.lifecycleScope.launch {
             dashboardViewModel.isLoading.collect { isLoading ->
                 // Show/hide loading indicator if needed
@@ -511,7 +511,7 @@ class QuotesFragment : Fragment() {
                 }
             }
         }
-        
+
         viewLifecycleOwner.lifecycleScope.launch {
             dashboardViewModel.error.collect { error ->
                 if (error != null) {
@@ -521,7 +521,7 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     private fun updateDashboardUI(dashboardData: DashboardData) {
         try {
             // Update statistics cards
@@ -529,7 +529,7 @@ class QuotesFragment : Fragment() {
             dashboardContent.findViewById<TextView>(R.id.tv_avg_system_size).text = String.format("%.1f", dashboardData.averageSystemSize)
             dashboardContent.findViewById<TextView>(R.id.tv_total_revenue).text = "R${String.format("%.0f", dashboardData.totalRevenue)}"
             dashboardContent.findViewById<TextView>(R.id.tv_avg_savings).text = "R${String.format("%.0f", dashboardData.averageMonthlySavings)}"
-            
+
             // Update circle chart with system size distribution
             val circleChart = dashboardContent.findViewById<dev.solora.ui.views.CircleChartView>(R.id.circle_chart)
             val labels = listOf("0-3 kW", "3-6 kW", "6-10 kW", "10+ kW")
@@ -540,37 +540,37 @@ class QuotesFragment : Fragment() {
                 dashboardData.systemSizeDistribution.size10kwPlus.toFloat()
             )
             circleChart.setChartDataSimple(labels, values)
-            
+
             // Update legend
             dashboardContent.findViewById<TextView>(R.id.tv_legend_0_3kw).text = "0-3 kW (${dashboardData.systemSizeDistribution.size0to3kw})"
             dashboardContent.findViewById<TextView>(R.id.tv_legend_3_6kw).text = "3-6 kW (${dashboardData.systemSizeDistribution.size3to6kw})"
             dashboardContent.findViewById<TextView>(R.id.tv_legend_6_10kw).text = "6-10 kW (${dashboardData.systemSizeDistribution.size6to10kw})"
             dashboardContent.findViewById<TextView>(R.id.tv_legend_10kw_plus).text = "10+ kW (${dashboardData.systemSizeDistribution.size10kwPlus})"
-            
+
             // Update monthly performance
             dashboardContent.findViewById<TextView>(R.id.tv_quotes_this_month).text = "${dashboardData.monthlyPerformance.quotesThisMonth} quotes"
             dashboardContent.findViewById<TextView>(R.id.tv_quotes_last_month).text = "${dashboardData.monthlyPerformance.quotesLastMonth} quotes"
             dashboardContent.findViewById<TextView>(R.id.tv_growth_percentage).text = "${String.format("%.1f", dashboardData.monthlyPerformance.growthPercentage)}%"
-            
+
             // Update top locations
             updateTopLocations(dashboardData.topLocations)
-            
+
             // Dashboard UI updated successfully
-            
+
         } catch (e: Exception) {
             // ("QuotesFragment", "Error updating dashboard UI: ${e.message}", e)
             Toast.makeText(requireContext(), "Error updating dashboard: ${e.message}", Toast.LENGTH_SHORT).show()
         }
     }
-    
-    
+
+
     private fun updateTopLocations(topLocations: List<dev.solora.dashboard.LocationStats>) {
         val layout = dashboardContent.findViewById<LinearLayout>(R.id.layout_top_locations)
         layout.removeAllViews()
-        
+
         if (topLocations.isEmpty()) {
             val emptyText = TextView(requireContext()).apply {
-                text = "No location data available"
+                text = getString(R.string.no_location_data)
                 textSize = 14f
                 setTextColor(resources.getColor(android.R.color.darker_gray, null))
                 setPadding(0, 16, 0, 16)
@@ -578,14 +578,14 @@ class QuotesFragment : Fragment() {
             layout.addView(emptyText)
             return
         }
-        
+
         topLocations.take(5).forEachIndexed { index, location ->
             val locationView = LinearLayout(requireContext()).apply {
                 orientation = LinearLayout.HORIZONTAL
                 setPadding(0, 12, 0, 12)
                 gravity = android.view.Gravity.CENTER_VERTICAL
             }
-            
+
             // Rank number
             val rankText = TextView(requireContext()).apply {
                 text = "${index + 1}."
@@ -594,7 +594,7 @@ class QuotesFragment : Fragment() {
                 setTypeface(null, android.graphics.Typeface.BOLD)
                 minWidth = 32
             }
-            
+
             val locationText = TextView(requireContext()).apply {
                 text = location.location
                 textSize = 14f
@@ -602,19 +602,19 @@ class QuotesFragment : Fragment() {
                 layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
                 setPadding(16, 0, 0, 0)
             }
-            
+
             val countText = TextView(requireContext()).apply {
-                text = "${location.count} quotes"
+                text = getString(R.string.quotes_count, location.count)
                 textSize = 14f
                 setTextColor(resources.getColor(R.color.solora_orange, null))
                 setTypeface(null, android.graphics.Typeface.BOLD)
             }
-            
+
             locationView.addView(rankText)
             locationView.addView(locationText)
             locationView.addView(countText)
             layout.addView(locationView)
-            
+
             // Add divider except for last item
             if (index < topLocations.take(5).size - 1) {
                 val divider = View(requireContext()).apply {
@@ -626,62 +626,61 @@ class QuotesFragment : Fragment() {
             }
         }
     }
-    
+
     private fun updateResultsTab(calculation: dev.solora.quote.QuoteOutputs) {
         // Update dashboard tab summary
         tvQuoteSummary.text = buildString {
-            appendLine("Number of Panels: ${calculation.panels}")
-            appendLine("Total System Size: ${String.format("%.1f", calculation.systemKw)} kW")
-            appendLine("Recommended Inverter: ${String.format("%.1f", calculation.inverterKw)} kW")
-            appendLine("Estimated Monthly Savings: R ${String.format("%.2f", calculation.monthlySavingsRands)}")
-            appendLine("Estimated Monthly Generation: ${String.format("%.0f", calculation.estimatedMonthlyGeneration)} kWh")
-            appendLine("Payback Period: ${calculation.paybackMonths} months")
-            
+            appendLine(getString(R.string.panels_count, calculation.panels))
+            appendLine(getString(R.string.total_system_size, String.format("%.1f", calculation.systemKw)))
+            appendLine(getString(R.string.recommended_inverter, String.format("%.1f", calculation.inverterKw)))
+            appendLine(getString(R.string.estimated_monthly_savings, String.format("%.2f", calculation.monthlySavingsRands)))
+            appendLine(getString(R.string.estimated_monthly_generation, String.format("%.0f", calculation.estimatedMonthlyGeneration)))
+            appendLine(getString(R.string.payback_period, calculation.paybackMonths))
+
             // Add NASA data if available
             calculation.detailedAnalysis?.let { analysis ->
                 appendLine("")
-                appendLine("NASA Solar Data:")
+                appendLine(getString(R.string.nasa_solar_data))
                 analysis.locationData?.let { location ->
-                    appendLine("Location: ${String.format("%.4f", location.latitude)}, ${String.format("%.4f", location.longitude)}")
-                    appendLine("Average Annual Irradiance: ${String.format("%.1f", location.averageAnnualIrradiance)} kWh/m²/day")
-                    appendLine("Average Annual Sun Hours: ${String.format("%.1f", location.averageAnnualSunHours)} hours/day")
+                    appendLine(getString(R.string.location_coords, String.format("%.4f", location.latitude), String.format("%.4f", location.longitude)))
+                    appendLine(getString(R.string.avg_annual_irradiance, String.format("%.1f", location.averageAnnualIrradiance)))
+                    appendLine(getString(R.string.avg_annual_sun_hours, String.format("%.1f", location.averageAnnualSunHours)))
                 }
                 analysis.optimalMonth?.let { month ->
-                    appendLine("Optimal Solar Month: ${getMonthName(month)}")
+                    appendLine(getString(R.string.optimal_solar_month, getMonthName(month)))
                 }
                 analysis.averageTemperature?.let { temp ->
-                    appendLine("Average Temperature: ${String.format("%.1f", temp)}°C")
+                    appendLine(getString(R.string.average_temperature, String.format("%.1f", temp)))
                 }
             }
         }
-        
         // Results updated: ${calculation.systemKw}kW system, R${calculation.monthlySavingsRands} savings
     }
-    
+
     private fun getMonthName(month: Int): String {
         return when (month) {
-            1 -> "January"
-            2 -> "February"
-            3 -> "March"
-            4 -> "April"
-            5 -> "May"
-            6 -> "June"
-            7 -> "July"
-            8 -> "August"
-            9 -> "September"
-            10 -> "October"
-            11 -> "November"
-            12 -> "December"
-            else -> "Unknown"
+            1 -> getString(R.string.january)
+            2 -> getString(R.string.february)
+            3 -> getString(R.string.march)
+            4 -> getString(R.string.april)
+            5 -> getString(R.string.may)
+            6 -> getString(R.string.june)
+            7 -> getString(R.string.july)
+            8 -> getString(R.string.august)
+            9 -> getString(R.string.september)
+            10 -> getString(R.string.october)
+            11 -> getString(R.string.november)
+            12 -> getString(R.string.december)
+            else -> getString(R.string.unknown)
         }
     }
 
     private fun saveQuoteWithClientDetails() {
         // saveQuoteWithClientDetails called
-        
+
         quotesViewModel.lastCalculation.value?.let { calculation ->
             // Found calculation to save: ${calculation.systemKw}kW system
-            
+
             // Get client details from the form
             val reference = etReference.text.toString().trim().ifEmpty { "QUOTE-${System.currentTimeMillis()}" }
             val firstName = etFirstName.text.toString().trim()
@@ -698,14 +697,14 @@ class QuotesFragment : Fragment() {
             val address = etClientAddress.text.toString().trim().ifEmpty { "Unknown Address" }
             val email = etEmail.text.toString().trim()
             val contact = etContact.text.toString().trim()
-            
+
             // Quote details - Ref: $reference, Client: $clientName, Address: $address
-            
+
             if (clientName == "Unknown Client") {
                 Toast.makeText(requireContext(), "Please enter client name", Toast.LENGTH_SHORT).show()
                 return
             }
-            
+
             // Navigate to ClientDetailsFragment to save quote and create lead
             val bundle = Bundle().apply {
                 putSerializable("calculation_outputs", calculation)
@@ -724,41 +723,43 @@ class QuotesFragment : Fragment() {
                 when (state) {
                     is CalculationState.Idle -> {
                         btnCalculate.isEnabled = true
-                        btnCalculate.text = "calculate"
+                        btnCalculate.text = getString(R.string.calculate_button)
                     }
                     is CalculationState.Loading -> {
                         btnCalculate.isEnabled = false
-                        btnCalculate.text = "calculating..."
+                        btnCalculate.text = getString(R.string.calculating_button)
                     }
                     is CalculationState.Success -> {
                         btnCalculate.isEnabled = true
-                        btnCalculate.text = "calculate"
-                        
-                        // Update the dashboard tab with calculation results
+                        btnCalculate.text = getString(R.string.calculate_button)
+
+                        // Update dashboard tab with calculation results
                         updateResultsTab(state.outputs)
-                        
+
                         // Navigate to quote results fragment
                         navigateToQuoteResults(state.outputs, etAddress.text.toString().trim())
                     }
                     is CalculationState.Error -> {
                         btnCalculate.isEnabled = true
-                        btnCalculate.text = "calculate"
+                        btnCalculate.text = getString(R.string.calculate_button)
                         Toast.makeText(requireContext(), state.message, Toast.LENGTH_LONG).show()
                     }
                 }
             }
         }
-        
-        // Observe last quote for results display
+
+
+
+    // Observe last quote for results display
         viewLifecycleOwner.lifecycleScope.launch {
             quotesViewModel.lastQuote.collect { quote ->
                 if (quote != null) {
                     // Update dashboard tab summary
                     tvQuoteSummary.text = buildString {
-                        appendLine("Number of Panels: ${(quote.systemKwp * 1000 / quote.panelWatt).toInt()}")
-                        appendLine("Total System Size: ${String.format("%.1f", quote.systemKwp)} kW")
-                        appendLine("Recommended Inverter: ${String.format("%.1f", quote.systemKwp * 0.8)} kW")
-                        appendLine("Estimated Monthly Savings: R ${String.format("%.2f", quote.monthlySavings)}")
+                        appendLine(getString(R.string.panels_count, (quote.systemKwp * 1000 / quote.panelWatt).toInt()))
+                        appendLine(getString(R.string.total_system_size, String.format("%.1f", quote.systemKwp)))
+                        appendLine(getString(R.string.recommended_inverter, String.format("%.1f", quote.systemKwp * 0.8)))
+                        appendLine(getString(R.string.estimated_monthly_savings, String.format("%.2f", quote.monthlySavings)))
                     }
                     
                     // Pre-fill client address from calculation
@@ -921,8 +922,8 @@ class QuotesFragment : Fragment() {
     private fun clearDateFilterDashboard() {
         fromDate = null
         toDate = null
-        tvDateFilterFrom.text = "Select Date"
-        tvDateFilterTo.text = "Select Date"
+        tvDateFilterFrom.text = getString(R.string.select_date)
+        tvDateFilterTo.text = getString(R.string.select_date)
         applyDateFilterToDashboard()
     }
     
