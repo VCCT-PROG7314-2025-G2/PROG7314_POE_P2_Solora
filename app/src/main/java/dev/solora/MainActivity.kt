@@ -9,6 +9,7 @@ import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.launch
 import android.util.Log
 import dev.solora.profile.LocaleHelper
+import android.content.SharedPreferences
 
 // This is the main activity that starts when the app opens
 // It checks if everything is working and then shows the main app
@@ -23,7 +24,6 @@ class MainActivity : FragmentActivity() {
         val context = LocaleHelper.setLocale(newBase, lang)
         super.attachBaseContext(context)
     }
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

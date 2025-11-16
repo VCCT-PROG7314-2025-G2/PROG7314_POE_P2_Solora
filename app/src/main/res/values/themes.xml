@@ -5,6 +5,44 @@
         <item name="colorOnPrimary">@color/solora_on_primary</item>
         <item name="colorPrimaryContainer">@color/solora_orange_dark</item>
         <item name="android:navigationBarColor">@color/solora_orange</item>
+        <item name="materialCalendarTheme">@style/ThemeOverlay.Solora.DatePicker</item>
+    </style>
+    
+    <!-- Date Picker Theme with Solora Orange -->
+    <style name="ThemeOverlay.Solora.DatePicker" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/solora_orange</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/black</item>
+        <item name="colorSecondary">@color/solora_orange</item>
+        <item name="colorOnSecondary">@android:color/white</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Solora.Button.TextButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Solora.Button.TextButton</item>
+        <item name="materialCalendarHeaderLayout">@style/Widget.Solora.MaterialCalendar.HeaderLayout</item>
+        <item name="materialCalendarHeaderTitle">@style/Widget.Solora.MaterialCalendar.HeaderTitle</item>
+    </style>
+    
+    <!-- Compact calendar header layout -->
+    <style name="Widget.Solora.MaterialCalendar.HeaderLayout" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
+        <item name="android:paddingTop">16dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+    
+    <!-- Compact calendar header title -->
+    <style name="Widget.Solora.MaterialCalendar.HeaderTitle" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
+        <item name="android:textSize">16sp</item>
+        <item name="android:paddingTop">48dp</item>
+        <item name="android:paddingBottom">8dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
+    </style>
+    
+    <!-- Orange text buttons for date picker -->
+    <style name="Widget.Solora.Button.TextButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/solora_orange</item>
+        <item name="rippleColor">@color/solora_orange</item>
     </style>
 </resources>
 

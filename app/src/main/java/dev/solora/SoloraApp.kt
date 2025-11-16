@@ -14,6 +14,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
 
+/**
+ * Application class that initializes Firebase services
+ * Enables offline persistence for Firestore data
+ */
 class SoloraApp : Application() {
 
     lateinit var offlineRepo: OfflineRepository
@@ -26,6 +30,7 @@ class SoloraApp : Application() {
 
         // Initialize Firebase
         FirebaseApp.initializeApp(this)
+        // Enable offline persistence so data is available without network
         FirebaseFirestore.getInstance().firestoreSettings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
             .build()

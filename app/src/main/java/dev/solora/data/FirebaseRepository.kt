@@ -10,8 +10,11 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.tasks.await
 
-// This class handles all the data operations
-// It talks to Firebase and our API to save and get quotes, leads, and settings
+/**
+ * Repository for all Firebase data operations
+ * Provides unified interface for quotes, leads, settings, and user profiles
+ * Attempts API calls first, falls back to direct Firestore access
+ */
 class FirebaseRepository {
     private val firestore = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
@@ -19,8 +22,12 @@ class FirebaseRepository {
     
     private fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-    // Quote Operations - saving and getting quotes
-    // This saves a quote to the database
+    // ==================== Quote Operations ====================
+    
+    /**
+     * Save quote to database
+     * Tries API endpoint first, falls back to direct Firestore write
+     */
     suspend fun saveQuote(quote: FirebaseQuote): Result<String> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
@@ -40,8 +47,10 @@ class FirebaseRepository {
         }
     }
 
-    // This gets all quotes for the current user
-    // It updates in real-time when quotes change
+    /**
+     * Get all quotes for current user as a real-time Flow
+     * Automatically updates when quotes are added/modified/deleted
+     */
     suspend fun getQuotes(): Flow<List<FirebaseQuote>> = callbackFlow {
         val userId = getCurrentUserId()
         if (userId == null) {
@@ -56,9 +65,10 @@ class FirebaseRepository {
                 .orderBy("createdAt", Query.Direction.DESCENDING)
                 .addSnapshotListener { snapshot, error ->
                     if (error != null) {
-                        
+                        // Firestore may require composite index for queries
                         // Check for index requirement error
                         if (error.message?.contains("index", ignoreCase = true) == true) {
+                            // Index creation link will be in error message
                         }
                         
                         if (!isClosedForSend) {
@@ -87,6 +97,10 @@ class FirebaseRepository {
         }
     }
 
+    /**
+     * Get single quote by ID
+     * Tries API first, falls back to direct Firestore read
+     */
     suspend fun getQuoteById(quoteId: String): Result<FirebaseQuote?> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
@@ -186,7 +200,12 @@ class FirebaseRepository {
         }
     }
 
-    // Lead Operations
+    // ==================== Lead Operations ====================
+    
+    /**
+     * Save lead to database
+     * Tries API endpoint first, falls back to direct Firestore write
+     */
     suspend fun saveLead(lead: FirebaseLead): Result<String> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
@@ -254,12 +273,20 @@ class FirebaseRepository {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
             
-            
-            // Use update() instead of set() to only update specific fields
-            val updateData = mapOf(
+            // Update all lead fields
+            val updateData = mutableMapOf<String, Any?>(
+                "name" to lead.name,
+                "email" to lead.email,
+                "phone" to lead.phone,
+                "status" to lead.status,
+                "notes" to lead.notes,
                 "quoteId" to lead.quoteId,
+                "followUpDate" to lead.followUpDate,
                 "updatedAt" to com.google.firebase.Timestamp.now()
             )
+            
+            // Remove null values
+            updateData.entries.removeIf { it.value == null }
             
             firestore.collection("leads")
                 .document(leadId)
@@ -316,7 +343,12 @@ class FirebaseRepository {
         }
     }
 
-    // User Profile Operations
+    // ==================== User Profile Operations ====================
+    
+    /**
+     * Save user profile information
+     * Updates both API and Firestore for consistency
+     */
     suspend fun saveUserProfile(user: FirebaseUser): Result<String> {
         return try {
             val userId = getCurrentUserId() ?: throw Exception("User not authenticated")
@@ -392,7 +424,11 @@ class FirebaseRepository {
         }
     }
 
-    // Configuration Operations
+    // ==================== Configuration Operations ====================
+    
+    /**
+     * Get app-wide configuration settings
+     */
     suspend fun getConfiguration(): Result<FirebaseConfiguration?> {
         return try {
             val doc = firestore.collection("configurations")

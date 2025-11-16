@@ -183,21 +183,23 @@
 
         <LinearLayout
             android:id="@+id/btn_biometric_login"
-            android:layout_width="200dp"
-            android:layout_height="40dp"
+            android:layout_width="wrap_content"
+            android:layout_height="50dp"
             android:clickable="true"
             android:focusable="true"
             android:layout_gravity="center"
             android:layout_marginTop="20dp"
+            android:paddingStart="24dp"
+            android:paddingEnd="24dp"
             android:background="@drawable/authentication_button_background_orange"
             android:orientation="horizontal"
+            android:gravity="center"
             android:visibility="gone">
 
             <ImageView
-                android:layout_width="20dp"
-                android:layout_height="20dp"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
                 android:layout_gravity="center"
-                android:layout_marginStart="20dp"
                 android:src="@android:drawable/ic_lock_lock"
                 android:tint="@color/solora_on_primary" />
 
@@ -205,11 +207,11 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_marginStart="10dp"
+                android:layout_marginStart="12dp"
                 android:fontFamily="@font/poppins_medium"
                 android:text="@string/use_biometric_login"
                 android:textColor="@color/solora_on_primary"
-                android:textSize="14sp" />
+                android:textSize="15sp" />
         </LinearLayout>
 
         <LinearLayout

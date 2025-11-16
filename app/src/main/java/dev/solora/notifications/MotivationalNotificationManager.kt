@@ -51,27 +51,21 @@ class MotivationalNotificationManager(private val context: Context) {
     }
 
     suspend fun isNotificationsEnabled(): Boolean {
-        // Try to get from Firebase user_settings first for cross-device sync
-        val firebasePreference = getFromUserSettings("notificationsEnabled") as? Boolean
-        if (firebasePreference != null) {
-            // Update local DataStore with Firebase value
-            context.motivationalDataStore.edit { prefs ->
-                prefs[KEY_NOTIFICATIONS_ENABLED] = firebasePreference
-            }
-            return firebasePreference
-        }
-        
-        // Fall back to local DataStore, default to true
+        // Use local DataStore during session (fast)
         return context.motivationalDataStore.data.first()[KEY_NOTIFICATIONS_ENABLED] ?: true
     }
     
     suspend fun syncNotificationPreference() {
-        // Sync preference from Firebase when user logs in
         val firebasePreference = getFromUserSettings("notificationsEnabled") as? Boolean
+        
         if (firebasePreference != null) {
             context.motivationalDataStore.edit { prefs ->
                 prefs[KEY_NOTIFICATIONS_ENABLED] = firebasePreference
             }
+        } else {
+            // Initialize Firebase with default value if it doesn't exist
+            val currentLocalValue = context.motivationalDataStore.data.first()[KEY_NOTIFICATIONS_ENABLED] ?: true
+            saveToUserSettings("notificationsEnabled", currentLocalValue)
         }
     }
 
@@ -88,15 +82,47 @@ class MotivationalNotificationManager(private val context: Context) {
             
             val quoteCount = quotesSnapshot.size()
             
-            val message = generateMotivationalMessage(quoteCount)
-            
-            if (message != null) {
-                showLocalNotification(message.first, message.second)
+            if (shouldSendNotificationForCount(quoteCount, "quotes")) {
+                val message = generateMotivationalMessage(quoteCount)
+                
+                if (message != null) {
+                    showLocalNotification(message.first, message.second)
+                    markMilestoneAsNotified(quoteCount, "quotes")
+                }
             }
             
         } catch (e: Exception) {
-            // Fallback message if Firestore fails
-            showLocalNotification("Great job!", "You've created a new quote!")
+            if (shouldSendFallbackNotification()) {
+                showLocalNotification("Great job!", "You've created a new quote!")
+                markFallbackNotificationSent()
+            }
+        }
+    }
+
+    suspend fun checkAndSendLeadMessage() {
+        if (!isNotificationsEnabled()) return
+        
+        val userId = auth.currentUser?.uid ?: return
+        
+        try {
+            val leadsSnapshot = firestore.collection("leads")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+            
+            val leadCount = leadsSnapshot.size()
+            
+            if (shouldSendNotificationForCount(leadCount, "leads")) {
+                val message = generateLeadMotivationalMessage(leadCount)
+                
+                if (message != null) {
+                    showLocalNotification(message.first, message.second)
+                    markMilestoneAsNotified(leadCount, "leads")
+                }
+            }
+            
+        } catch (e: Exception) {
+            // Handle error silently
         }
     }
 
@@ -121,6 +147,33 @@ class MotivationalNotificationManager(private val context: Context) {
         }
     }
 
+    private fun generateLeadMotivationalMessage(leadCount: Int): Pair<String, String>? {
+        return when {
+            leadCount == 1 -> {
+                "First lead!" to "You've added your first lead! Your pipeline is growing!"
+            }
+            leadCount in 2..4 -> {
+                "Building momentum!" to "You have $leadCount leads in your pipeline. Keep prospecting!"
+            }
+            leadCount in 5..9 -> {
+                "Excellent work!" to "$leadCount leads and counting! Your pipeline is looking strong!"
+            }
+            leadCount >= 10 -> {
+                "Sales superstar!" to "You've reached $leadCount leads! Your pipeline is thriving!"
+            }
+            else -> {
+                "New lead!" to "You've added a new lead to your pipeline!"
+            }
+        }
+    }
+
+    fun sendTestNotification() {
+        showLocalNotification(
+            "Solora Notifications Enabled! 🎉",
+            "You'll receive motivational messages as you add quotes and leads!"
+        )
+    }
+    
     private fun showLocalNotification(title: String, body: String) {
         val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         
@@ -180,15 +233,10 @@ class MotivationalNotificationManager(private val context: Context) {
         
         try {
             firestore.collection("user_settings").document(userId)
-                .update(key, value)
+                .set(mapOf(key to value), com.google.firebase.firestore.SetOptions.merge())
+                .await()
         } catch (e: Exception) {
-            // If document doesn't exist, create it
-            try {
-                firestore.collection("user_settings").document(userId)
-                    .set(mapOf(key to value))
-            } catch (createException: Exception) {
-                // Handle error silently
-            }
+            // Handle error silently
         }
     }
     
@@ -204,6 +252,51 @@ class MotivationalNotificationManager(private val context: Context) {
             // Handle error silently, return null to fall back to local storage
             null
         }
+    }
+    
+    private suspend fun shouldSendNotificationForCount(count: Int, type: String): Boolean {
+        val key = if (type == "quotes") "notifiedQuoteMilestones" else "notifiedLeadMilestones"
+        val notifiedMilestones = getFromUserSettings(key) as? List<*>
+        val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() } ?: emptyList()
+        
+        val currentMilestone = when {
+            count == 1 -> 1
+            count in 2..4 -> 2
+            count in 5..9 -> 5
+            count >= 10 -> 10
+            else -> 0
+        }
+        
+        return currentMilestone > 0 && !milestonesList.contains(currentMilestone)
+    }
+    
+    private suspend fun markMilestoneAsNotified(count: Int, type: String) {
+        val currentMilestone = when {
+            count == 1 -> 1
+            count in 2..4 -> 2
+            count in 5..9 -> 5
+            count >= 10 -> 10
+            else -> return
+        }
+        
+        val key = if (type == "quotes") "notifiedQuoteMilestones" else "notifiedLeadMilestones"
+        val notifiedMilestones = getFromUserSettings(key) as? List<*>
+        val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() }?.toMutableList() ?: mutableListOf()
+        
+        if (!milestonesList.contains(currentMilestone)) {
+            milestonesList.add(currentMilestone)
+            saveToUserSettings(key, milestonesList)
+        }
+    }
+    
+    private suspend fun shouldSendFallbackNotification(): Boolean {
+        val lastFallback = getFromUserSettings("lastFallbackNotification") as? Long ?: 0L
+        val oneDayAgo = System.currentTimeMillis() - (24 * 60 * 60 * 1000L)
+        return lastFallback < oneDayAgo
+    }
+    
+    private suspend fun markFallbackNotificationSent() {
+        saveToUserSettings("lastFallbackNotification", System.currentTimeMillis())
     }
 
 }

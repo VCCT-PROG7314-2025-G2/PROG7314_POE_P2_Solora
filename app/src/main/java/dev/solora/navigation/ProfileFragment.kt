@@ -1,6 +1,9 @@
 package dev.solora.navigation
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -10,7 +13,9 @@ import android.widget.ImageButton
 import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
@@ -26,21 +31,42 @@ import dev.solora.api.FirebaseFunctionsApi
 import dev.solora.notifications.MotivationalNotificationManager
 import dev.solora.profile.LocaleHelper
 import kotlinx.coroutines.launch
+import android.content.SharedPreferences
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
 
+    companion object {
+        private const val PREFS_NAME = "solora_settings"
+    }
+
     private lateinit var notificationManager: MotivationalNotificationManager
     private val auth = FirebaseAuth.getInstance()
     private val firebaseApi = FirebaseFunctionsApi()
+    
+    private var isInitializingToggle = false
+    private var isInitializingFingerprint = false
+    
+    // Permission launcher for notifications (Android 13+)
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            enableNotificationsAfterPermission()
+        } else {
+            switchNotifications.isChecked = false
+            Toast.makeText(requireContext(), "Notification permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
     
     // UI Elements
     private lateinit var tvAvatar: TextView
     private lateinit var tvName: TextView
     private lateinit var tvTitle: TextView
     private lateinit var switchNotifications: Switch
+    private lateinit var switchFingerprint: Switch
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_profile, container, false)
@@ -55,8 +81,8 @@ class ProfileFragment : Fragment() {
         setupClickListeners(view)
         observeViewModel()
         loadNotificationSettings()
-
-        // Load user profile
+        loadFingerprintSettings()
+        
         profileViewModel.loadUserProfile()
     }
     
@@ -65,6 +91,7 @@ class ProfileFragment : Fragment() {
         tvName = view.findViewById(R.id.tv_name)
         tvTitle = view.findViewById(R.id.tv_title)
         switchNotifications = view.findViewById(R.id.switch_notifications)
+        switchFingerprint = view.findViewById(R.id.switch_fingerprint)
     }
     
     private fun setupClickListeners(view: View) {
@@ -78,9 +105,13 @@ class ProfileFragment : Fragment() {
             showChangePasswordDialog()
         }
         
-        // Authentication
-        view.findViewById<View>(R.id.btn_authentication)?.setOnClickListener {
-            showAuthenticationDialog()
+        // Fingerprint Toggle
+        view.findViewById<View>(R.id.btn_fingerprint)?.setOnClickListener {
+            switchFingerprint.isChecked = !switchFingerprint.isChecked
+        }
+        
+        switchFingerprint.setOnCheckedChangeListener { _, isChecked ->
+            handleFingerprintToggle(isChecked)
         }
         
         // Language
@@ -195,67 +226,47 @@ class ProfileFragment : Fragment() {
         tvTitle.text = ""
     }
     
-    private fun showAuthenticationDialog() {
-        val items = arrayOf("Fingerprint Authentication", "Stay Logged In (30 days)")
-        val checkedItems = booleanArrayOf(
-            authViewModel.isBiometricEnabled.value,
-            true // We'll get this from repository
-        )
-
-        // Get current stay logged in preference
+    private fun loadFingerprintSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            authViewModel.getStayLoggedInPreference { stayLoggedIn ->
-                checkedItems[1] = stayLoggedIn
-
-                MaterialAlertDialogBuilder(requireContext())
-                    .setTitle("Authentication Settings")
-                    .setMultiChoiceItems(items, checkedItems) { _, which, isChecked ->
-                        when (which) {
-                            0 -> handleBiometricToggle(isChecked)
-                            1 -> handleStayLoggedInToggle(isChecked)
-                        }
-                    }
-                    .setPositiveButton("Close", null)
-                    .show()
+            authViewModel.isBiometricEnabled.collect { isEnabled ->
+                isInitializingFingerprint = true
+                switchFingerprint.isChecked = isEnabled
+                // Delay to ensure the switch listener doesn't fire during initialization
+                kotlinx.coroutines.delay(100)
+                isInitializingFingerprint = false
             }
         }
     }
-
-    private fun handleBiometricToggle(enable: Boolean) {
+    
+    private fun handleFingerprintToggle(enable: Boolean) {
+        if (isInitializingFingerprint) return
+        
         if (enable) {
             if (authViewModel.canUseBiometrics()) {
                 authViewModel.authenticateWithBiometrics(requireActivity() as androidx.fragment.app.FragmentActivity)
                 observeBiometricSetup()
             } else {
-                Toast.makeText(requireContext(),
-                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}",
+                switchFingerprint.isChecked = false
+                Toast.makeText(requireContext(), 
+                    "Fingerprint not available: ${authViewModel.getBiometricAvailabilityMessage()}", 
                     Toast.LENGTH_LONG).show()
             }
         } else {
             authViewModel.disableBiometric()
-            Toast.makeText(requireContext(), "Fingerprint authentication disabled", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Fingerprint login disabled", Toast.LENGTH_SHORT).show()
         }
     }
-
-    private fun handleStayLoggedInToggle(enable: Boolean) {
-        authViewModel.setStayLoggedIn(enable)
-        val message = if (enable) {
-            "You'll stay logged in for 30 days"
-        } else {
-            "You'll be logged out after 30 days of inactivity"
-        }
-        Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
-    }
-
+    
     private fun observeBiometricSetup() {
         viewLifecycleOwner.lifecycleScope.launch {
             authViewModel.biometricState.collect { state ->
                 when (state) {
                     is dev.solora.auth.BiometricState.Success -> {
-                        Toast.makeText(requireContext(), "Fingerprint authentication enabled", Toast.LENGTH_SHORT).show()
+                        Toast.makeText(requireContext(), "Fingerprint login enabled", Toast.LENGTH_SHORT).show()
                         authViewModel.clearBiometricState()
                     }
                     is dev.solora.auth.BiometricState.Error -> {
+                        switchFingerprint.isChecked = false
                         Toast.makeText(requireContext(), "Failed to enable fingerprint: ${state.message}", Toast.LENGTH_SHORT).show()
                         authViewModel.clearBiometricState()
                     }
@@ -294,25 +305,46 @@ class ProfileFragment : Fragment() {
 
     private fun loadNotificationSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Sync with Firebase first
+            isInitializingToggle = true
             notificationManager.syncNotificationPreference()
-
-            // Then load the synced preference
             val isEnabled = notificationManager.isNotificationsEnabled()
             switchNotifications.isChecked = isEnabled
+            isInitializingToggle = false
         }
     }
 
     private fun handleNotificationToggle(isEnabled: Boolean) {
-        viewLifecycleOwner.lifecycleScope.launch {
-            notificationManager.enableMotivationalNotifications(isEnabled)
-
-            if (isEnabled) {
-                Toast.makeText(requireContext(), "Motivational notifications enabled!", Toast.LENGTH_SHORT).show()
-                notificationManager.checkAndSendMotivationalMessage()
+        if (isInitializingToggle) return
+        
+        if (isEnabled) {
+            // Check permission for Android 13+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.POST_NOTIFICATIONS
+                    ) == PackageManager.PERMISSION_GRANTED) {
+                    enableNotificationsAfterPermission()
+                } else {
+                    notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                }
             } else {
-                Toast.makeText(requireContext(), "Motivational notifications disabled", Toast.LENGTH_SHORT).show()
+                enableNotificationsAfterPermission()
             }
+        } else {
+            viewLifecycleOwner.lifecycleScope.launch {
+                notificationManager.enableMotivationalNotifications(false)
+                Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun enableNotificationsAfterPermission() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            notificationManager.enableMotivationalNotifications(true)
+            Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
+            
+            // Send a test notification to confirm it's working
+            notificationManager.sendTestNotification()
         }
     }
     

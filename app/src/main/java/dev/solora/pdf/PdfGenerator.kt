@@ -12,12 +12,16 @@ import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.*
 
-// This class creates PDF files from quotes
-// It takes a quote and makes a nice-looking PDF that can be shared with customers
+/**
+ * Generates professional PDF quotes from FirebaseQuote data
+ * Creates HTML template and converts to PDF using iText library
+ */
 class PdfGenerator(private val context: Context) {
     
-    // This creates a PDF file from a quote
-    // It saves the PDF to the device and returns the file
+    /**
+     * Generate PDF quote file
+     * Saves to app's Documents/Quotes directory with timestamp
+     */
     fun generateQuotePdf(quote: FirebaseQuote): File? {
         return generateQuotePdf(quote, CompanySettings())
     }
@@ -83,13 +87,13 @@ class PdfGenerator(private val context: Context) {
         }
         
         val systemCost = if (systemSize > 0) {
-            // Use standard installation cost per kW (R15,000 per kW is industry standard)
+            // Industry standard: R15,000 per kW installation cost
             systemSize * 15000
         } else {
             0.0
         }
         
-        val tax = systemCost * 0.15 // Standard VAT rate
+        val tax = systemCost * 0.15 // 15% VAT (South African standard)
         val totalCost = systemCost + tax
         
         return """

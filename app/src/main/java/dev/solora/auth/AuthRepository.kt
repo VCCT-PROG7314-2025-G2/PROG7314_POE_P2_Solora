@@ -22,6 +22,10 @@ import java.io.IOException
 
 private val Context.dataStore by preferencesDataStore(name = "auth")
 
+/**
+ * Repository for authentication operations
+ * Handles Firebase Auth, user preferences, and biometric authentication setup
+ */
 class AuthRepository(private val context: Context) {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -47,10 +51,13 @@ class AuthRepository(private val context: Context) {
         prefs[KEY_HAS_SEEN_ONBOARDING] ?: false
     }
     
+    // Biometric is only enabled if both flag is set AND encrypted data exists
     val isBiometricEnabled: Flow<Boolean> = context.dataStore.data.catch { e ->
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
-        prefs[KEY_BIOMETRIC_ENABLED] ?: false
+        val flagEnabled = prefs[KEY_BIOMETRIC_ENABLED] ?: false
+        val dataExists = getCiphertextWrapperFromSharedPrefs() != null
+        flagEnabled && dataExists
     }
     
     val stayLoggedIn: Flow<Boolean> = context.dataStore.data.catch { e ->
@@ -69,6 +76,20 @@ class AuthRepository(private val context: Context) {
         return try {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Login failed: No user returned")
+            
+            // Get and update FCM token for push notifications
+            val fcmToken = try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
+            
+            // Update FCM token in Firestore
+            if (fcmToken != null) {
+                firestore.collection("users").document(user.uid)
+                    .update("fcmToken", fcmToken)
+                    .await()
+            }
             
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
@@ -104,23 +125,42 @@ class AuthRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Register new user with email/password
+     * Creates Firebase Auth user and stores profile in Firestore
+     */
     suspend fun register(name: String, surname: String, email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Registration failed: No user returned")
             
+            // Update Firebase Auth profile with display name
             val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
                 .setDisplayName(name)
                 .build()
             user.updateProfile(profileUpdates).await()
             
+            // Get FCM token for push notifications
+            val fcmToken = try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
+            
+            // Store additional user data in Firestore
             val userDoc = hashMapOf(
                 "name" to name,
                 "surname" to surname,
                 "email" to email,
+                "fcmToken" to fcmToken,
                 "createdAt" to com.google.firebase.Timestamp.now()
             )
             firestore.collection("users").document(user.uid).set(userDoc).await()
+            
+            // Initialize user_settings with notifications enabled by default
+            firestore.collection("user_settings").document(user.uid)
+                .set(mapOf("notificationsEnabled" to true), com.google.firebase.firestore.SetOptions.merge())
+                .await()
             
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
@@ -147,13 +187,27 @@ class AuthRepository(private val context: Context) {
             val firstName = nameParts.getOrNull(0) ?: ""
             val lastName = if (nameParts.size > 1) nameParts.subList(1, nameParts.size).joinToString(" ") else ""
 
+            // Get FCM token for push notifications
+            val fcmToken = try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
+
             val userDoc = hashMapOf(
                 "name" to firstName,
                 "surname" to lastName,
-                "email" to (user.email ?: "")
+                "email" to (user.email ?: ""),
+                "fcmToken" to fcmToken,
+                "createdAt" to com.google.firebase.Timestamp.now()
             )
 
             firestore.collection("users").document(user.uid).set(userDoc).await()
+
+            // Initialize user_settings with notifications enabled by default
+            firestore.collection("user_settings").document(user.uid)
+                .set(mapOf("notificationsEnabled" to true), com.google.firebase.firestore.SetOptions.merge())
+                .await()
 
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
@@ -208,10 +262,14 @@ class AuthRepository(private val context: Context) {
         }
     }
     
-    private fun clearBiometricData() {
+    private suspend fun clearBiometricData() {
         try {
             val sharedPrefs = context.getSharedPreferences(SHARED_PREFS_FILENAME, Context.MODE_PRIVATE)
             sharedPrefs.edit().remove(CIPHERTEXT_WRAPPER).apply()
+            
+            context.dataStore.edit { prefs ->
+                prefs[KEY_BIOMETRIC_ENABLED] = false
+            }
         } catch (e: Exception) {
             // Ignore errors when clearing biometric data
         }
@@ -275,6 +333,10 @@ class AuthRepository(private val context: Context) {
         }
     }
     
+    /**
+     * Verify biometric authentication by comparing stored email with current user
+     * Clears biometric data if mismatch detected (security measure)
+     */
     suspend fun authenticateWithStoredData(storedData: String): Result<String> {
         return try {
             val currentUser = firebaseAuth.currentUser
@@ -282,6 +344,7 @@ class AuthRepository(private val context: Context) {
                 updateLastLoginTime()
                 Result.success("User authenticated via biometric")
             } else {
+                // Security: clear biometric data if user doesn't match
                 clearBiometricData()
                 Result.failure(Exception("Biometric data mismatch - cleared for security"))
             }
@@ -302,6 +365,10 @@ class AuthRepository(private val context: Context) {
         }
     }
     
+    /**
+     * Check if user should be auto-logged out
+     * Returns true if user hasn't logged in for 30 days and "stay logged in" is disabled
+     */
     suspend fun shouldAutoLogout(): Boolean {
         val stayLoggedIn = stayLoggedIn.first()
         if (stayLoggedIn) return false
@@ -309,6 +376,7 @@ class AuthRepository(private val context: Context) {
         val dataStorePrefs = context.dataStore.data.first()
         val lastLoginTime = dataStorePrefs[KEY_LAST_LOGIN_TIME] ?: return false
         
+        // Auto-logout after 30 days of inactivity
         val thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000L
         val currentTime = System.currentTimeMillis()
         

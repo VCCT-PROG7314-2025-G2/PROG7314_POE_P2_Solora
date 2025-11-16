@@ -178,9 +178,9 @@
                     android:layout_height="1dp"
                     android:background="#E0E0E0" />
 
-                <!-- Authentication -->
+                <!-- Fingerprint Login -->
                 <LinearLayout
-                    android:id="@+id/btn_authentication"
+                    android:id="@+id/btn_fingerprint"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
@@ -193,7 +193,7 @@
                     <ImageView
                         android:layout_width="24dp"
                         android:layout_height="24dp"
-                        android:src="@android:drawable/ic_secure"
+                        android:src="@android:drawable/ic_lock_lock"
                         android:tint="#666666"
                         android:layout_marginEnd="16dp" />
 
@@ -205,11 +205,11 @@
                         android:textColor="@android:color/black"
                         android:textSize="16sp" />
 
-                    <ImageView
-                        android:layout_width="16dp"
-                        android:layout_height="16dp"
-                        android:src="@android:drawable/ic_media_next"
-                        android:tint="#666666" />
+                    <Switch
+                        android:id="@+id/switch_fingerprint"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:checked="false" />
 
                 </LinearLayout>
 

@@ -28,6 +28,7 @@ class NotificationsFragment : Fragment() {
     private var switchNotifications: Switch? = null
     private var tvNotificationStatus: TextView? = null
     
+    private var isInitializingToggle = false
     private lateinit var notificationManager: MotivationalNotificationManager
     
     // Permission launcher for notifications (Android 13+)
@@ -84,19 +85,19 @@ class NotificationsFragment : Fragment() {
     
     private fun loadNotificationSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            // Sync with Firebase first
+            isInitializingToggle = true
             notificationManager.syncNotificationPreference()
-            
-            // Then load the synced preference
             val isEnabled = notificationManager.isNotificationsEnabled()
             switchNotifications?.isChecked = isEnabled
             updateNotificationStatus(isEnabled)
+            isInitializingToggle = false
         }
     }
     
     private fun handleNotificationToggle(isEnabled: Boolean) {
+        if (isInitializingToggle) return
+        
         if (isEnabled) {
-            // Check permission for Android 13+ (API 33+)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(
                         requireContext(),
@@ -107,11 +108,9 @@ class NotificationsFragment : Fragment() {
                     notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                 }
             } else {
-                // No permission needed for Android 12 and below
                 enableNotificationsAfterPermission()
             }
         } else {
-            // Disable notifications
             viewLifecycleOwner.lifecycleScope.launch {
                 notificationManager.enableMotivationalNotifications(false)
                 updateNotificationStatus(false)

@@ -11,8 +11,16 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 
+/**
+ * Wrapper for encrypted data and initialization vector
+ * Required for AES-GCM encryption/decryption
+ */
 data class CiphertextWrapper(val ciphertext: ByteArray, val initializationVector: ByteArray)
 
+/**
+ * Interface for cryptographic operations using Android Keystore
+ * Provides secure encryption/decryption for biometric authentication tokens
+ */
 interface CryptographyManager {
 
     fun getInitializedCipherForEncryption(keyName: String): Cipher
@@ -41,10 +49,15 @@ interface CryptographyManager {
 
 fun CryptographyManager(): CryptographyManager = CryptographyManagerImpl()
 
+/**
+ * Implementation using Android Keystore for hardware-backed security
+ * Keys are stored in secure hardware and require biometric authentication to use
+ */
 private class CryptographyManagerImpl : CryptographyManager {
 
     private val KEY_SIZE = 256
     private val ANDROID_KEYSTORE = "AndroidKeyStore"
+    // AES-GCM mode provides authenticated encryption
     private val ENCRYPTION_BLOCK_MODE = KeyProperties.BLOCK_MODE_GCM
     private val ENCRYPTION_PADDING = KeyProperties.ENCRYPTION_PADDING_NONE
     private val ENCRYPTION_ALGORITHM = KeyProperties.KEY_ALGORITHM_AES
@@ -101,10 +114,16 @@ private class CryptographyManagerImpl : CryptographyManager {
         return Cipher.getInstance(transformation)
     }
 
+    /**
+     * Get existing key from Keystore or create new one
+     * New keys require biometric authentication and are invalidated if biometrics change
+     */
     private fun getOrCreateSecretKey(keyName: String): SecretKey {
         val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE)
         keyStore.load(null)
+        // Return existing key if found
         keyStore.getKey(keyName, null)?.let { return it as SecretKey }
+        // Create new key with biometric protection
         val paramsBuilder = KeyGenParameterSpec.Builder(
             keyName,
             KeyProperties.PURPOSE_ENCRYPT or KeyProperties.PURPOSE_DECRYPT
@@ -114,6 +133,7 @@ private class CryptographyManagerImpl : CryptographyManager {
             setEncryptionPaddings(ENCRYPTION_PADDING)
             setKeySize(KEY_SIZE)
             setUserAuthenticationRequired(true)
+            // Invalidate key if user re-enrolls biometrics (security feature)
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
                 setInvalidatedByBiometricEnrollment(true)
             }

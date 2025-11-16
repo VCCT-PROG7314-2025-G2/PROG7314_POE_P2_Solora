@@ -15,9 +15,14 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import dev.solora.data.FirebaseUser as UserInfo
 
+/**
+ * ViewModel for authentication operations
+ * Manages user login, registration, biometric authentication, and onboarding state
+ */
 class AuthViewModel(app: Application) : AndroidViewModel(app) {
     private val repo = AuthRepository(app.applicationContext)
     
+    // Observable state flows for UI
     val hasSeenOnboarding = repo.hasSeenOnboarding.stateIn(viewModelScope, SharingStarted.Eagerly, false)
     val userInfo = repo.getCurrentUserInfo().stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null as UserInfo?)
     val isBiometricEnabled = repo.isBiometricEnabled.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
@@ -140,6 +145,11 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
     
+    /**
+     * Authenticate user using biometric (fingerprint/face)
+     * If biometric data exists, decrypts and authenticates
+     * If not, sets up new biometric authentication
+     */
     fun authenticateWithBiometrics(activity: FragmentActivity) {
         if (!canUseBiometrics()) {
             _biometricState.value = BiometricState.Error("Fingerprint not available")
@@ -150,6 +160,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
         val cryptographyManager = CryptographyManager()
         val ciphertextWrapper = repo.getCiphertextWrapperFromSharedPrefs()
         
+        // If encrypted token exists, decrypt and authenticate
         if (ciphertextWrapper != null) {
             val cipher = cryptographyManager.getInitializedCipherForDecryption(
                 AuthRepository.SECRET_KEY_NAME,
@@ -178,6 +189,7 @@ class AuthViewModel(app: Application) : AndroidViewModel(app) {
             val promptInfo = BiometricPromptUtils.createPromptInfo(activity)
             biometricPrompt.authenticate(promptInfo, BiometricPrompt.CryptoObject(cipher))
         } else {
+            // First-time setup: encrypt and store user token
             val cipher = cryptographyManager.getInitializedCipherForEncryption(AuthRepository.SECRET_KEY_NAME)
             val biometricPrompt = BiometricPromptUtils.createBiometricPrompt(activity) { authResult ->
                 authResult.cryptoObject?.cipher?.let { 

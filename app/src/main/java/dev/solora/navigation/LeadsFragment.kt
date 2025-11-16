@@ -10,6 +10,8 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -23,6 +25,7 @@ import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.firebase.auth.FirebaseAuth
+import com.google.android.material.datepicker.MaterialDatePicker
 import dev.solora.R
 import dev.solora.SoloraApp
 import dev.solora.leads.LeadsViewModel
@@ -31,6 +34,8 @@ import dev.solora.data.LocalLead
 import dev.solora.data.OfflineRepository
 import dev.solora.data.toFirebaseLead
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 import java.util.UUID
 
 class LeadsFragment : Fragment() {
@@ -55,9 +60,12 @@ class LeadsFragment : Fragment() {
     private lateinit var etAddress: EditText
     private lateinit var etEmail: EditText
     private lateinit var etContact: EditText
+    private lateinit var spinnerStatus: AutoCompleteTextView
+    private lateinit var etFollowUpDate: EditText
     private lateinit var btnAdd: Button
     private lateinit var btnCancel: Button
-    
+    private var selectedFollowUpDateMillis: Long? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_leads, container, false)
         return view
@@ -149,9 +157,41 @@ class LeadsFragment : Fragment() {
         etAddress = view.findViewById(R.id.et_address)
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
+        spinnerStatus = view.findViewById(R.id.spinner_status)
+        etFollowUpDate = view.findViewById(R.id.et_follow_up_date)
         btnAdd = view.findViewById(R.id.btn_add)
         btnCancel = view.findViewById(R.id.btn_cancel)
         
+        // Setup status dropdown
+        setupStatusDropdown()
+
+        // Setup follow-up date picker
+        setupFollowUpDatePicker()
+    }
+
+    private fun setupStatusDropdown() {
+        val statusOptions = arrayOf("New", "Contacted", "Qualified", "Negotiating", "Closed - Won", "Closed - Lost")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statusOptions)
+        spinnerStatus.setAdapter(adapter)
+        spinnerStatus.setText("New", false) // Set default value
+    }
+
+    private fun setupFollowUpDatePicker() {
+        etFollowUpDate.setOnClickListener {
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Follow-up Date")
+                .setSelection(selectedFollowUpDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds())
+                .setTheme(R.style.ThemeOverlay_Solora_DatePicker)
+                .build()
+
+            datePicker.addOnPositiveButtonClickListener { selection ->
+                selectedFollowUpDateMillis = selection
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                etFollowUpDate.setText(dateFormat.format(Date(selection)))
+            }
+
+            datePicker.show(parentFragmentManager, "DATE_PICKER")
+        }
     }
     
     private fun setupRecyclerView() {
@@ -224,8 +264,83 @@ class LeadsFragment : Fragment() {
         }
         
         dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
+            showUpdateStatusDialog(lead, dialog)
+        }
 
-            Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
+        dialog.show()
+    }
+
+    private fun showUpdateStatusDialog(lead: FirebaseLead, parentDialog: androidx.appcompat.app.AlertDialog) {
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_status_selection, null)
+        val radioGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.radio_group_status)
+        val btnUpdate = dialogView.findViewById<Button>(R.id.btn_update)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btn_cancel)
+
+        // Status options with descriptions
+        val statusOptions = listOf(
+            Triple("New", "new", "Lead has just been created"),
+            Triple("Contacted", "contacted", "Initial contact has been made"),
+            Triple("Qualified", "qualified", "Lead meets our criteria"),
+            Triple("Negotiating", "negotiating", "Discussing terms and pricing"),
+            Triple("Closed - Won", "closed_won", "Successfully converted to customer"),
+            Triple("Closed - Lost", "closed_lost", "Lead did not convert")
+        )
+
+        var selectedStatus = lead.status
+
+        // Add radio buttons for each status
+        statusOptions.forEach { (displayName, statusValue, description) ->
+            val radioButton = android.widget.RadioButton(requireContext()).apply {
+                text = displayName
+                id = View.generateViewId()
+                setPadding(16, 24, 16, 24)
+                textSize = 16f
+                setTextColor(resources.getColor(android.R.color.black, null))
+                buttonTintList = android.content.res.ColorStateList.valueOf(resources.getColor(dev.solora.R.color.solora_orange, null))
+
+                // Add description below
+                val descText = "\n$description"
+                text = "$displayName$descText"
+
+                // Check if this is the current status
+                isChecked = (statusValue == lead.status)
+
+                setOnClickListener {
+                    selectedStatus = statusValue
+                }
+            }
+            radioGroup.addView(radioButton)
+        }
+
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
+
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+
+        btnUpdate.setOnClickListener {
+            if (selectedStatus != lead.status) {
+                lead.id?.let { leadId ->
+                    val displayName = statusOptions.find { it.second == selectedStatus }?.first ?: selectedStatus
+
+                    // Update status in Firebase
+                    leadsViewModel.updateLeadStatus(leadId, selectedStatus)
+
+                    // Close both dialogs
+                    dialog.dismiss()
+                    parentDialog.dismiss()
+
+                    // Show toast after closing dialogs
+                    Toast.makeText(requireContext(), "Status updated to $displayName", Toast.LENGTH_SHORT).show()
+
+                    // Real-time Firestore listener will automatically update the list
+                }
+            } else {
+                dialog.dismiss()
+            }
         }
         
         dialog.show()
@@ -326,14 +441,18 @@ class LeadsFragment : Fragment() {
         etAddress.text.clear()
         etEmail.text.clear()
         etContact.text.clear()
+        etFollowUpDate.text.clear()
+        selectedFollowUpDateMillis = null
+        spinnerStatus.setText("New", false)
     }
-
+    
     private fun addFirebaseLead() {
         val firstName = etFirstName.text.toString().trim()
         val lastName = etLastName.text.toString().trim()
         val address = etAddress.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val contact = etContact.text.toString().trim()
+        val selectedStatus = spinnerStatus.text.toString().trim()
 
         // Validation
         if (firstName.isEmpty()) {
@@ -349,16 +468,40 @@ class LeadsFragment : Fragment() {
             return
         }
         if (contact.isEmpty()) {
-            Toast.makeText(requireContext(), "Please enter contact information", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Please enter contact information", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
         val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
-            Toast.makeText(requireContext(), "You must be logged in to save a lead", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                requireContext(),
+                "You must be logged in to save a lead",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
         val fullName = "$firstName $lastName"
+
+        // Convert display status to database status
+        val status = when (selectedStatus) {
+            "New" -> "new"
+            "Contacted" -> "contacted"
+            "Qualified" -> "qualified"
+            "Negotiating" -> "negotiating"
+            "Closed - Won" -> "closed_won"
+            "Closed - Lost" -> "closed_lost"
+            else -> "new"
+        }
+
+        // Convert follow-up date to Timestamp if selected
+        val followUpTimestamp = selectedFollowUpDateMillis?.let {
+            com.google.firebase.Timestamp(Date(it))
+        }
+
+        // Add lead with status and follow-up date
+        leadsViewModel.addLead(fullName, email, contact, "", status, followUpTimestamp)
 
         // Build the LocalLead first (offline-first approach)
         val localLead = LocalLead(
@@ -394,9 +537,13 @@ class LeadsFragment : Fragment() {
                 clearForm()
                 hideAddLeadModal()
             }
+
+            // Clear form and hide modal
+            clearForm()
+            hideAddLeadModal()
+            Toast.makeText(requireContext(), "Lead added successfully!", Toast.LENGTH_SHORT).show()
         }
     }
-
     private fun isOnline(): Boolean {
         val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         val network = connectivityManager.activeNetwork ?: return false
@@ -437,13 +584,25 @@ class LeadsAdapter(
     inner class LeadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvReference = itemView.findViewById<android.widget.TextView>(R.id.tv_reference)
         private val tvName = itemView.findViewById<android.widget.TextView>(R.id.tv_name)
-        private val tvAddress = itemView.findViewById<android.widget.TextView>(R.id.tv_address)
+        private val tvEmail = itemView.findViewById<android.widget.TextView>(R.id.tv_email)
+        private val tvFollowUpDate = itemView.findViewById<android.widget.TextView>(R.id.tv_follow_up_date)
+        private val layoutFollowUp = itemView.findViewById<LinearLayout>(R.id.layout_follow_up)
         private val clickableArea = itemView.findViewById<LinearLayout>(R.id.clickable_area) ?: itemView
         
         fun bind(lead: FirebaseLead) {
             tvReference.text = lead.id ?: "N/A"
             tvName.text = lead.name
-            tvAddress.text = lead.email
+            tvEmail.text = if (lead.email.isNotEmpty()) lead.email else "No email"
+
+            // Display follow-up date if available
+            if (lead.followUpDate != null) {
+                layoutFollowUp.visibility = View.VISIBLE
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                val followUpDateStr = dateFormat.format(lead.followUpDate.toDate())
+                tvFollowUpDate.text = "Follow-up: $followUpDateStr"
+            } else {
+                layoutFollowUp.visibility = View.GONE
+            }
             
             clickableArea.setOnClickListener { onLeadClick(lead) }
         }

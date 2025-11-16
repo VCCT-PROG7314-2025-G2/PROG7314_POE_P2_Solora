@@ -1,306 +1,267 @@
 package dev.solora.leads
 
 import android.app.Application
-import android.content.Context
-import android.net.ConnectivityManager
-import android.net.NetworkCapabilities
-import android.util.Log
-import androidx.core.content.ContentProviderCompat.requireContext
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.Timestamp
-import com.google.firebase.auth.FirebaseAuth
-import dev.solora.SoloraApp
 import dev.solora.data.FirebaseLead
 import dev.solora.data.FirebaseRepository
-import dev.solora.data.LocalLead
-import dev.solora.data.OfflineRepository
-import dev.solora.data.toFirebaseLead
-import dev.solora.data.toLocalLead
-import kotlinx.coroutines.flow.MutableStateFlow
+import dev.solora.notifications.MotivationalNotificationManager
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.emitAll
 import kotlinx.coroutines.launch
-import java.util.Date
-import java.util.UUID
+import com.google.firebase.auth.FirebaseAuth
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
-
     private val firebaseRepository = FirebaseRepository()
-    private val offlineRepo: OfflineRepository = (getApplication() as SoloraApp).offlineRepo
+    private val notificationManager = MotivationalNotificationManager(app.applicationContext)
     private var leadsForSelection: List<FirebaseLead> = emptyList()
-
-    // Local state
-    private val _leads = MutableStateFlow<List<FirebaseLead>>(emptyList())
-    val leads: StateFlow<List<FirebaseLead>> get() = _leads
 
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
+        // LeadsViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}
         if (currentUser == null) {
-            Log.w("LeadsViewModel", "No user logged in! Leads will be empty.")
-        } else {
-            refreshLeads()
+            // WARNING: No user logged in! Leads will be empty.
         }
     }
 
-    // Refresh leads
-    fun refreshLeads() {
-        viewModelScope.launch {
-            val context = getApplication<Application>().applicationContext
-            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: return@launch
-
-            if (isOnline(context)) {
-
-                syncOfflineLeads()
-
-                // Fetch fresh leads from firebase
-                val result = firebaseRepository.getLeadsForUser(userId)
-                val firebaseLeads = result.getOrNull() ?: emptyList()
-
-                // Update room db and mark as synced
-                firebaseLeads.forEach { lead ->
-                    offlineRepo.saveLeadOffline(lead.toLocalLead().copy(synced = true))
-                }
-
-                _leads.value = firebaseLeads
-            } else {
-
-                val localLeads = offlineRepo.getLocalLeads()
-                _leads.value = localLeads.map { it.toFirebaseLead() }
-            }
-        }
-    }
-
-    // Offline Add
-    fun addLeadOffline(localLead: LocalLead) {
-        viewModelScope.launch {
-            try {
-                offlineRepo.saveLeadOffline(localLead)
-                refreshLeads()
-            } catch (e: Exception) {
-                Log.e("LeadsViewModel", "Failed to save lead offline", e)
-            }
-        }
-    }
-
-    fun addLeadOnline(lead: FirebaseLead) {
-        viewModelScope.launch {
-            try {
-                val result = firebaseRepository.saveLead(lead)
-                if (result.isSuccess) {
-                    // Save in Room as synced
-                    offlineRepo.saveLeadOffline(lead.toLocalLead().copy(synced = true))
-                } else {
-                    // fallback: save offline for retry
-                    offlineRepo.saveLeadOffline(lead.toLocalLead())
-                }
-            } catch (e: Exception) {
-                Log.e("LeadsViewModel", "Failed to save lead online", e)
-                // fallback offline
-                offlineRepo.saveLeadOffline(lead.toLocalLead())
-            }
-        }
-    }
-
-    fun syncOfflineLeads() {
-        viewModelScope.launch {
-            val unsyncedLeads = offlineRepo.getUnsyncedLeads()
-            unsyncedLeads.forEach { localLead ->
-                val firebaseLead = localLead.toFirebaseLead()
-                try {
-                    val result = firebaseRepository.saveLead(firebaseLead) // use your existing saveLead()
-                    if (result.isSuccess) {
-                        // Update local lead as synced
-                        offlineRepo.markLeadAsSynced(localLead.id)
-                    } else {
-                        Log.e("LeadsViewModel", "Failed to sync lead: ${result.exceptionOrNull()?.message}")
-                    }
-                } catch (e: Exception) {
-                    Log.e("LeadsViewModel", "Exception syncing lead: ${e.message}", e)
-                }
-            }
-        }
-    }
-
-    /*fun addLeadOffline(
-        firstName: String,
-        lastName: String,
-        email: String,
-        phone: String,
-        notes: String = "",
-        quoteId: String? = null
-    ) {
-        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid
-        if (currentUserId == null) {
-            Log.w("LeadsViewModel", "User not logged in, cannot save lead")
-            return
-        }
-
-        val fullName = "$firstName $lastName"
-
-        val newLead = FirebaseLead(
-            id = null,
-            name = fullName,
-            email = email,
-            phone = phone,
-            status = "New",
-            notes = notes,
-            quoteId = quoteId,
-            createdAt = null,
-            updatedAt = null,
-            userId = currentUserId
-        )
-
-        viewModelScope.launch {
-            try {
-                offlineRepo.saveLeadOffline(newLead)
-                refreshLeads()
-            } catch (e: Exception) {
-                Log.e("LeadsViewModel", "Failed to save lead offline", e)
-            }
-        }
-    }*/
-
-    suspend fun addLeadToFirebase(lead: FirebaseLead): Boolean {
-        return try {
-            val result = firebaseRepository.saveLead(lead)
-            result.isSuccess
-        } catch (e: Exception) {
-            Log.e("LeadsViewModel", "Failed to save lead to Firebase", e)
-            false
-        }
-    }
-
-    private fun isOnline(context: Context): Boolean {
-        val cm = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
-        val network = cm.activeNetwork ?: return false
-        val caps = cm.getNetworkCapabilities(network) ?: return false
-        return caps.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
-    }
-
-    val firebaseLeadsFlow = flow {
-        try {
-            val apiResult = firebaseRepository.getLeadsViaApi()
-            if (apiResult.isSuccess) {
-                emit(apiResult.getOrNull() ?: emptyList())
-            } else {
-                emitAll(firebaseRepository.getLeads())
-            }
-        } catch (e: Exception) {
-            emitAll(firebaseRepository.getLeads())
-        }
+    // Firebase leads flow - filtered by logged-in user's ID
+    // Using real-time Firestore listener for automatic updates
+    val leads = flow {
+        // Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
+        // Use direct Firestore with real-time listener for automatic updates
+        emitAll(firebaseRepository.getLeads())
     }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        emptyList()
+        viewModelScope, 
+        SharingStarted.WhileSubscribed(5000), 
+        emptyList<FirebaseLead>()
     )
 
-    fun addLead(name: String, email: String, phone: String, notes: String = "") {
-        viewModelScope.launch {
+    fun addLead(name: String, email: String, phone: String, notes: String = "", status: String = "new", followUpDate: com.google.firebase.Timestamp? = null) {
+        viewModelScope.launch { 
             val lead = FirebaseLead(
                 name = name,
                 email = email,
                 phone = phone,
-                status = "new",
-                notes = notes
+                status = status,
+                notes = notes,
+                followUpDate = followUpDate
             )
-            firebaseRepository.saveLead(lead)
+            
+            val result = firebaseRepository.saveLead(lead)
+            if (result.isSuccess) {
+                notificationManager.checkAndSendLeadMessage()
+            } else {
+                // Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}
+            }
         }
     }
-
+    
     fun updateLeadStatus(leadId: String, status: String, notes: String = "") {
         viewModelScope.launch {
-            val result = firebaseRepository.getLeadById(leadId)
-            val currentLead = result.getOrNull() ?: return@launch
-            val updated = currentLead.copy(
-                status = status,
-                notes = notes.ifEmpty { currentLead.notes }
-            )
-            firebaseRepository.updateLead(leadId, updated)
+            try {
+                // Get current lead
+                val result = firebaseRepository.getLeadById(leadId)
+                if (result.isSuccess) {
+                    val currentLead = result.getOrNull()
+                    if (currentLead != null) {
+                        val updatedLead = currentLead.copy(
+                            status = status,
+                            notes = notes.ifEmpty { currentLead.notes }
+                        )
+                        
+                        val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                        if (updateResult.isSuccess) {
+                            // Lead status updated in Firebase
+                        } else {
+                            // Failed to update lead status in Firebase: ${updateResult.exceptionOrNull()?.message}
+                        }
+                    }
+                } else {
+                    // Failed to get lead: ${result.exceptionOrNull()?.message}
+                }
+            } catch (e: Exception) {
+                // Error updating lead status: ${e.message}
+            }
         }
     }
-
+    
     fun deleteLead(leadId: String) {
         viewModelScope.launch {
-            firebaseRepository.deleteLead(leadId)
+            try {
+                val result = firebaseRepository.deleteLead(leadId)
+                if (result.isSuccess) {
+                    // Lead deleted from Firebase
+                } else {
+                    // Failed to delete lead from Firebase: ${result.exceptionOrNull()?.message}
+                }
+            } catch (e: Exception) {
+                // Error deleting lead: ${e.message}
+            }
         }
     }
-
-    fun setLeadsForSelection(leads: List<FirebaseLead>) {
-        leadsForSelection = leads
-    }
-
-    fun getLeadsForSelection(): List<FirebaseLead> = leadsForSelection
-
+    
+    // Create a lead from a quote
     fun createLeadFromQuote(
         quoteId: String,
         clientName: String,
         address: String,
         email: String = "",
         phone: String = "",
-        notes: String = ""
+        notes: String = "",
+        status: String = "qualified"
     ) {
         viewModelScope.launch {
-            val lead = FirebaseLead(
-                name = clientName,
-                email = email,
-                phone = phone,
-                status = "qualified",
-                notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
-                quoteId = quoteId
-            )
-            firebaseRepository.saveLead(lead)
+            try {
+                val lead = FirebaseLead(
+                    name = clientName,
+                    email = email,
+                    phone = phone,
+                    status = status,
+                    notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
+                    quoteId = quoteId
+                )
+                
+                val result = firebaseRepository.saveLead(lead)
+                if (result.isSuccess) {
+                    notificationManager.checkAndSendLeadMessage()
+                } else {
+                    // Failed to save lead from quote to Firebase: ${result.exceptionOrNull()?.message}
+                }
+            } catch (e: Exception) {
+                // Error creating lead from quote: ${e.message}
+            }
         }
     }
-
+    
+    fun setLeadsForSelection(leads: List<FirebaseLead>) {
+        leadsForSelection = leads
+    }
+    
+    fun getLeadsForSelection(): List<FirebaseLead> {
+        return leadsForSelection
+    }
+    
+    // Link an existing quote to an existing lead
     fun linkQuoteToLead(leadId: String, quoteId: String) {
         viewModelScope.launch {
-            val result = firebaseRepository.getLeadById(leadId)
-            val currentLead = result.getOrNull() ?: return@launch
-            val updated = currentLead.copy(quoteId = quoteId)
-            firebaseRepository.updateLead(leadId, updated)
+            try {
+                // Get the current lead
+                val result = firebaseRepository.getLeadById(leadId)
+                if (result.isSuccess) {
+                    val currentLead = result.getOrNull()
+                    if (currentLead != null) {
+                        // Update the lead with the quote ID
+                        val updatedLead = currentLead.copy(quoteId = quoteId)
+                        val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                        
+                        if (updateResult.isSuccess) {
+                            // Quote $quoteId linked to lead $leadId
+                        } else {
+                            // Failed to link quote to lead: ${updateResult.exceptionOrNull()?.message}
+                        }
+                    } else {
+                        // Lead not found: $leadId
+                    }
+                } else {
+                    // Error getting lead: ${result.exceptionOrNull()?.message}
+                }
+            } catch (e: Exception) {
+                // ("LeadsViewModel", "Error linking quote to lead: ${e.message}", e)
+            }
         }
     }
-
+    
+    // Synchronous version for immediate feedback
     suspend fun linkQuoteToLeadSync(leadId: String, quoteId: String): Boolean {
-        try {
+        return try {
+            // Starting linkQuoteToLeadSync - LeadId: $leadId, QuoteId: $quoteId
+            
+            // Validate inputs
+            if (leadId.isBlank() || quoteId.isBlank()) {
+                // Invalid IDs - LeadId: '$leadId', QuoteId: '$quoteId'
+                return false
+            }
+            
+            // Get the current lead
+            // Getting lead by ID: $leadId
             val result = firebaseRepository.getLeadById(leadId)
-            val lead = result.getOrNull() ?: return false
-
-            val updated = lead.copy(quoteId = quoteId)
-            val updateResult = firebaseRepository.updateLead(leadId, updated)
-
-            return updateResult.isSuccess
-        } catch (_: Exception) {
+            
+            if (result.isSuccess) {
+                val currentLead = result.getOrNull()
+                // Lead retrieved: ${currentLead?.id}, Name: ${currentLead?.name}
+                
+                if (currentLead != null) {
+                    // Update the lead with the quote ID
+                    val updatedLead = currentLead.copy(quoteId = quoteId)
+                    // Updating lead with quote ID: $quoteId
+                    
+                    val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                    
+                    if (updateResult.isSuccess) {
+                        // Successfully linked quote $quoteId to lead $leadId
+                        return true
+                    } else {
+                        val error = updateResult.exceptionOrNull()
+                        // ("LeadsViewModel", "Failed to update lead in Firebase: ${error?.message}", error)
+                        return false
+                    }
+                } else {
+                    // Lead not found in database: $leadId
+                    return false
+                }
+            } else {
+                val error = result.exceptionOrNull()
+                // ("LeadsViewModel", "Error getting lead from Firebase: ${error?.message}", error)
+                return false
+            }
+        } catch (e: Exception) {
+            // ("LeadsViewModel", "Unexpected error linking quote to lead: ${e.message}", e)
             return false
         }
     }
-
+    
+    // Synchronous version for immediate feedback
     suspend fun createLeadFromQuoteSync(
         quoteId: String,
         clientName: String,
         address: String,
         email: String = "",
         phone: String = "",
-        notes: String = ""
+        notes: String = "",
+        status: String = "qualified"
     ): Boolean {
-        try {
+        return try {
+            if (quoteId.isBlank() || clientName.isBlank()) {
+                return false
+            }
+            
             val lead = FirebaseLead(
                 name = clientName,
                 email = email,
                 phone = phone,
-                status = "qualified",
+                status = status,
                 notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
                 quoteId = quoteId
             )
+            
             val result = firebaseRepository.saveLead(lead)
-            return result.isSuccess
-        } catch (_: Exception) {
-            return false
+            if (result.isSuccess) {
+                val leadId = result.getOrNull()
+                if (!leadId.isNullOrBlank()) {
+                    notificationManager.checkAndSendLeadMessage()
+                    true
+                } else {
+                    false
+                }
+            } else {
+                val error = result.exceptionOrNull()
+                false
+            }
+        } catch (e: Exception) {
+            false
         }
     }
 }
-
