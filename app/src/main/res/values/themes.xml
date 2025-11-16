@@ -14,8 +14,21 @@
         <item name="colorOnPrimary">@android:color/white</item>
         <item name="colorSurface">@android:color/white</item>
         <item name="colorOnSurface">@android:color/black</item>
+        <item name="colorSecondary">@color/solora_orange</item>
+        <item name="colorOnSecondary">@android:color/white</item>
         <item name="materialCalendarHeaderSelection">@color/solora_orange</item>
         <item name="materialCalendarHeaderTitle">@color/solora_orange</item>
+        <item name="materialCalendarDay">@color/solora_orange</item>
+        <item name="materialCalendarYearSelected">@color/solora_orange</item>
+        <item name="materialCalendarMonthSelected">@color/solora_orange</item>
+        <item name="buttonBarPositiveButtonStyle">@style/Widget.Solora.Button.TextButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/Widget.Solora.Button.TextButton</item>
+    </style>
+    
+    <!-- Orange text buttons for date picker -->
+    <style name="Widget.Solora.Button.TextButton" parent="Widget.Material3.Button.TextButton">
+        <item name="android:textColor">@color/solora_orange</item>
+        <item name="rippleColor">@color/solora_orange</item>
     </style>
 </resources>
 

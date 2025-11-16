@@ -168,6 +168,7 @@ class LeadsFragment : Fragment() {
             val datePicker = MaterialDatePicker.Builder.datePicker()
                 .setTitleText("Select Follow-up Date")
                 .setSelection(selectedFollowUpDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds())
+                .setTheme(R.style.ThemeOverlay_Solora_DatePicker)
                 .build()
 
             datePicker.addOnPositiveButtonClickListener { selection ->
@@ -258,46 +259,68 @@ class LeadsFragment : Fragment() {
     }
     
     private fun showUpdateStatusDialog(lead: FirebaseLead) {
-        val statusOptions = arrayOf("New", "Contacted", "Qualified", "Negotiating", "Closed - Won", "Closed - Lost")
-        val currentStatusDisplay = when (lead.status) {
-            "new" -> "New"
-            "contacted" -> "Contacted"
-            "qualified" -> "Qualified"
-            "negotiating" -> "Negotiating"
-            "closed_won" -> "Closed - Won"
-            "closed_lost" -> "Closed - Lost"
-            else -> "New"
+        val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_status_selection, null)
+        val radioGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.radio_group_status)
+        val btnUpdate = dialogView.findViewById<Button>(R.id.btn_update)
+        val btnCancel = dialogView.findViewById<Button>(R.id.btn_cancel)
+        
+        // Status options with descriptions
+        val statusOptions = listOf(
+            Triple("New", "new", "Lead has just been created"),
+            Triple("Contacted", "contacted", "Initial contact has been made"),
+            Triple("Qualified", "qualified", "Lead meets our criteria"),
+            Triple("Negotiating", "negotiating", "Discussing terms and pricing"),
+            Triple("Closed - Won", "closed_won", "Successfully converted to customer"),
+            Triple("Closed - Lost", "closed_lost", "Lead did not convert")
+        )
+        
+        var selectedStatus = lead.status
+        
+        // Add radio buttons for each status
+        statusOptions.forEach { (displayName, statusValue, description) ->
+            val radioButton = android.widget.RadioButton(requireContext()).apply {
+                text = displayName
+                id = View.generateViewId()
+                setPadding(16, 24, 16, 24)
+                textSize = 16f
+                setTextColor(resources.getColor(android.R.color.black, null))
+                buttonTintList = android.content.res.ColorStateList.valueOf(resources.getColor(dev.solora.R.color.solora_orange, null))
+                
+                // Add description below
+                val descText = "\n$description"
+                text = "$displayName$descText"
+                
+                // Check if this is the current status
+                isChecked = (statusValue == lead.status)
+                
+                setOnClickListener {
+                    selectedStatus = statusValue
+                }
+            }
+            radioGroup.addView(radioButton)
         }
         
-        val currentIndex = statusOptions.indexOf(currentStatusDisplay)
-        var selectedIndex = currentIndex
+        val dialog = MaterialAlertDialogBuilder(requireContext())
+            .setView(dialogView)
+            .setCancelable(true)
+            .create()
         
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Update Lead Status")
-            .setSingleChoiceItems(statusOptions, currentIndex) { _, which ->
-                selectedIndex = which
-            }
-            .setPositiveButton("Update") { _, _ ->
-                val newStatusDisplay = statusOptions[selectedIndex]
-                val newStatus = when (newStatusDisplay) {
-                    "New" -> "new"
-                    "Contacted" -> "contacted"
-                    "Qualified" -> "qualified"
-                    "Negotiating" -> "negotiating"
-                    "Closed - Won" -> "closed_won"
-                    "Closed - Lost" -> "closed_lost"
-                    else -> "new"
-                }
-                
-                if (newStatus != lead.status) {
-                    lead.id?.let { leadId ->
-                        leadsViewModel.updateLeadStatus(leadId, newStatus)
-                        Toast.makeText(requireContext(), "Status updated to $newStatusDisplay", Toast.LENGTH_SHORT).show()
-                    }
+        btnCancel.setOnClickListener {
+            dialog.dismiss()
+        }
+        
+        btnUpdate.setOnClickListener {
+            if (selectedStatus != lead.status) {
+                lead.id?.let { leadId ->
+                    leadsViewModel.updateLeadStatus(leadId, selectedStatus)
+                    val displayName = statusOptions.find { it.second == selectedStatus }?.first ?: selectedStatus
+                    Toast.makeText(requireContext(), "Status updated to $displayName", Toast.LENGTH_SHORT).show()
                 }
             }
-            .setNegativeButton("Cancel", null)
-            .show()
+            dialog.dismiss()
+        }
+        
+        dialog.show()
     }
     
     private fun setupClickListeners() {
