@@ -4,11 +4,17 @@ import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
 import dev.solora.api.FirebaseFunctionsApi
 import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.first
 import android.util.Log
 import dev.solora.profile.LocaleHelper
+
+private val Context.darkModeDataStore by preferencesDataStore(name = "dark_mode_settings")
 
 // This is the main activity that starts when the app opens
 // It checks if everything is working and then shows the main app
@@ -16,6 +22,10 @@ class MainActivity : FragmentActivity() {
     
     private val firebaseRepository = FirebaseRepository()
     private val apiService = FirebaseFunctionsApi()
+    
+    companion object {
+        private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode_enabled")
+    }
 
     override fun attachBaseContext(newBase: Context) {
         val sharedPrefs = newBase.getSharedPreferences("Settings", Context.MODE_PRIVATE)
@@ -27,11 +37,31 @@ class MainActivity : FragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        
+        // Apply dark mode before setting content view
+        applyDarkModeSettings()
+        
         setContentView(R.layout.activity_main)
         
         // Check if our API is working when the app starts
         // This makes sure everything is connected properly
         performStartupChecks()
+    }
+    
+    private fun applyDarkModeSettings() {
+        lifecycleScope.launch {
+            try {
+                val isDarkMode = darkModeDataStore.data.first()[KEY_DARK_MODE] ?: false
+                if (isDarkMode) {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                } else {
+                    AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                }
+            } catch (e: Exception) {
+                // Default to light mode if there's an error
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            }
+        }
     }
     
     private fun performStartupChecks() {

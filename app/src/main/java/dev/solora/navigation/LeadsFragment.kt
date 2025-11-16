@@ -46,6 +46,7 @@ class LeadsFragment : Fragment() {
     private lateinit var etAddress: EditText
     private lateinit var etEmail: EditText
     private lateinit var etContact: EditText
+    private lateinit var spinnerStatus: AutoCompleteTextView
     private lateinit var btnAdd: Button
     private lateinit var btnCancel: Button
     
@@ -138,9 +139,19 @@ class LeadsFragment : Fragment() {
         etAddress = view.findViewById(R.id.et_address)
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
+        spinnerStatus = view.findViewById(R.id.spinner_status)
         btnAdd = view.findViewById(R.id.btn_add)
         btnCancel = view.findViewById(R.id.btn_cancel)
         
+        // Setup status dropdown
+        setupStatusDropdown()
+    }
+    
+    private fun setupStatusDropdown() {
+        val statusOptions = arrayOf("New", "Contacted", "Qualified", "Negotiating", "Closed - Won", "Closed - Lost")
+        val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statusOptions)
+        spinnerStatus.setAdapter(adapter)
+        spinnerStatus.setText("New", false) // Set default value
     }
     
     private fun setupRecyclerView() {
@@ -323,7 +334,7 @@ class LeadsFragment : Fragment() {
         val address = etAddress.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val contact = etContact.text.toString().trim()
-        val source = "Other"
+        val selectedStatus = spinnerStatus.text.toString().trim()
         
         // Validation
         if (firstName.isEmpty()) {
@@ -343,12 +354,21 @@ class LeadsFragment : Fragment() {
             return
         }
         
-        // Generate reference number
-        val reference = generateFirebaseLeadReference()
         val fullName = "$firstName $lastName"
         
-        // Add lead with separate email and phone fields
-        leadsViewModel.addLead(fullName, email, contact, "")
+        // Convert display status to database status
+        val status = when (selectedStatus) {
+            "New" -> "new"
+            "Contacted" -> "contacted"
+            "Qualified" -> "qualified"
+            "Negotiating" -> "negotiating"
+            "Closed - Won" -> "closed_won"
+            "Closed - Lost" -> "closed_lost"
+            else -> "new"
+        }
+        
+        // Add lead with status
+        leadsViewModel.addLead(fullName, email, contact, "", status)
         
         // Clear form and hide modal
         clearForm()

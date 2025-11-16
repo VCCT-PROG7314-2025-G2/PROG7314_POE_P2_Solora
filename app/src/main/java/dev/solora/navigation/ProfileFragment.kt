@@ -17,6 +17,11 @@ import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.first
 import dev.solora.R
 import kotlinx.coroutines.tasks.await
 import dev.solora.profile.ProfileViewModel
@@ -27,10 +32,16 @@ import dev.solora.notifications.MotivationalNotificationManager
 import dev.solora.profile.LocaleHelper
 import kotlinx.coroutines.launch
 
+private val Context.darkModeDataStore by preferencesDataStore(name = "dark_mode_settings")
+
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
     private val settingsViewModel: SettingsViewModel by viewModels()
     private val authViewModel: AuthViewModel by viewModels()
+
+    companion object {
+        private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode_enabled")
+    }
 
     private lateinit var notificationManager: MotivationalNotificationManager
     private val auth = FirebaseAuth.getInstance()
@@ -38,6 +49,7 @@ class ProfileFragment : Fragment() {
     
     private var isInitializingToggle = false
     private var isInitializingFingerprint = false
+    private var isInitializingDarkMode = false
     
     // UI Elements
     private lateinit var tvAvatar: TextView
@@ -45,6 +57,7 @@ class ProfileFragment : Fragment() {
     private lateinit var tvTitle: TextView
     private lateinit var switchNotifications: Switch
     private lateinit var switchFingerprint: Switch
+    private lateinit var switchDarkMode: Switch
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_profile, container, false)
@@ -60,6 +73,7 @@ class ProfileFragment : Fragment() {
         observeViewModel()
         loadNotificationSettings()
         loadFingerprintSettings()
+        loadDarkModeSettings()
         
         profileViewModel.loadUserProfile()
     }
@@ -70,6 +84,7 @@ class ProfileFragment : Fragment() {
         tvTitle = view.findViewById(R.id.tv_title)
         switchNotifications = view.findViewById(R.id.switch_notifications)
         switchFingerprint = view.findViewById(R.id.switch_fingerprint)
+        switchDarkMode = view.findViewById(R.id.switch_dark_mode)
     }
     
     private fun setupClickListeners(view: View) {
@@ -95,6 +110,15 @@ class ProfileFragment : Fragment() {
         // Language
         view.findViewById<View>(R.id.btn_language)?.setOnClickListener {
             showLanguageDialog()
+        }
+        
+        // Dark Mode Toggle
+        view.findViewById<View>(R.id.btn_dark_mode)?.setOnClickListener {
+            switchDarkMode.isChecked = !switchDarkMode.isChecked
+        }
+        
+        switchDarkMode.setOnCheckedChangeListener { _, isChecked ->
+            handleDarkModeToggle(isChecked)
         }
         
         // Notifications Toggle
@@ -301,6 +325,33 @@ class ProfileFragment : Fragment() {
                 Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(requireContext(), "Push notifications disabled", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+    
+    private fun loadDarkModeSettings() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            isInitializingDarkMode = true
+            val isDarkMode = requireContext().darkModeDataStore.data.first()[KEY_DARK_MODE] ?: false
+            switchDarkMode.isChecked = isDarkMode
+            isInitializingDarkMode = false
+        }
+    }
+    
+    private fun handleDarkModeToggle(enabled: Boolean) {
+        if (isInitializingDarkMode) return
+        
+        viewLifecycleOwner.lifecycleScope.launch {
+            requireContext().darkModeDataStore.edit { prefs ->
+                prefs[KEY_DARK_MODE] = enabled
+            }
+            
+            if (enabled) {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+                Toast.makeText(requireContext(), "Dark mode enabled", Toast.LENGTH_SHORT).show()
+            } else {
+                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+                Toast.makeText(requireContext(), "Dark mode disabled", Toast.LENGTH_SHORT).show()
             }
         }
     }

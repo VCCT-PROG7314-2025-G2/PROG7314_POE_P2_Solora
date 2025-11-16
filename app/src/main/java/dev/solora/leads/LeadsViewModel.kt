@@ -50,13 +50,13 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         emptyList<FirebaseLead>()
     )
 
-    fun addLead(name: String, email: String, phone: String, notes: String = "") {
+    fun addLead(name: String, email: String, phone: String, notes: String = "", status: String = "new") {
         viewModelScope.launch { 
             val lead = FirebaseLead(
                 name = name,
                 email = email,
                 phone = phone,
-                status = "new",
+                status = status,
                 notes = notes
             )
             
@@ -120,7 +120,8 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         address: String,
         email: String = "",
         phone: String = "",
-        notes: String = ""
+        notes: String = "",
+        status: String = "qualified"
     ) {
         viewModelScope.launch {
             try {
@@ -128,7 +129,7 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                     name = clientName,
                     email = email,
                     phone = phone,
-                    status = "qualified",
+                    status = status,
                     notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
                     quoteId = quoteId
                 )
@@ -239,7 +240,8 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         address: String,
         email: String = "",
         phone: String = "",
-        notes: String = ""
+        notes: String = "",
+        status: String = "qualified"
     ): Boolean {
         return try {
             if (quoteId.isBlank() || clientName.isBlank()) {
@@ -250,7 +252,7 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                 name = clientName,
                 email = email,
                 phone = phone,
-                status = "qualified",
+                status = status,
                 notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
                 quoteId = quoteId
             )
