@@ -56,6 +56,7 @@ data class FirebaseLead(
     val notes: String? = null,
     val quoteId: String? = null, // Link to quote if applicable
     val userId: String = "", // Link to Firebase Auth user
+    val followUpDate: Timestamp? = null, // Optional follow-up date
     @ServerTimestamp
     val createdAt: Timestamp? = null,
     @ServerTimestamp

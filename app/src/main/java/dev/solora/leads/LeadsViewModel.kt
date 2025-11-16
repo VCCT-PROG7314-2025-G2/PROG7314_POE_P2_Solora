@@ -50,14 +50,15 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         emptyList<FirebaseLead>()
     )
 
-    fun addLead(name: String, email: String, phone: String, notes: String = "", status: String = "new") {
+    fun addLead(name: String, email: String, phone: String, notes: String = "", status: String = "new", followUpDate: com.google.firebase.Timestamp? = null) {
         viewModelScope.launch { 
             val lead = FirebaseLead(
                 name = name,
                 email = email,
                 phone = phone,
                 status = status,
-                notes = notes
+                notes = notes,
+                followUpDate = followUpDate
             )
             
             val result = firebaseRepository.saveLead(lead)

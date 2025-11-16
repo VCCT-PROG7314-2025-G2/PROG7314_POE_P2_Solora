@@ -21,10 +21,13 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.datepicker.MaterialDatePicker
 import dev.solora.R
 import dev.solora.leads.LeadsViewModel
 import dev.solora.data.FirebaseLead
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.*
 
 class LeadsFragment : Fragment() {
     
@@ -47,8 +50,10 @@ class LeadsFragment : Fragment() {
     private lateinit var etEmail: EditText
     private lateinit var etContact: EditText
     private lateinit var spinnerStatus: AutoCompleteTextView
+    private lateinit var etFollowUpDate: EditText
     private lateinit var btnAdd: Button
     private lateinit var btnCancel: Button
+    private var selectedFollowUpDateMillis: Long? = null
     
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         val view = inflater.inflate(R.layout.fragment_leads, container, false)
@@ -140,11 +145,15 @@ class LeadsFragment : Fragment() {
         etEmail = view.findViewById(R.id.et_email)
         etContact = view.findViewById(R.id.et_contact)
         spinnerStatus = view.findViewById(R.id.spinner_status)
+        etFollowUpDate = view.findViewById(R.id.et_follow_up_date)
         btnAdd = view.findViewById(R.id.btn_add)
         btnCancel = view.findViewById(R.id.btn_cancel)
         
         // Setup status dropdown
         setupStatusDropdown()
+        
+        // Setup follow-up date picker
+        setupFollowUpDatePicker()
     }
     
     private fun setupStatusDropdown() {
@@ -152,6 +161,23 @@ class LeadsFragment : Fragment() {
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statusOptions)
         spinnerStatus.setAdapter(adapter)
         spinnerStatus.setText("New", false) // Set default value
+    }
+    
+    private fun setupFollowUpDatePicker() {
+        etFollowUpDate.setOnClickListener {
+            val datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Follow-up Date")
+                .setSelection(selectedFollowUpDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds())
+                .build()
+
+            datePicker.addOnPositiveButtonClickListener { selection ->
+                selectedFollowUpDateMillis = selection
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                etFollowUpDate.setText(dateFormat.format(Date(selection)))
+            }
+
+            datePicker.show(parentFragmentManager, "DATE_PICKER")
+        }
     }
     
     private fun setupRecyclerView() {
@@ -326,6 +352,9 @@ class LeadsFragment : Fragment() {
         etAddress.text.clear()
         etEmail.text.clear()
         etContact.text.clear()
+        etFollowUpDate.text.clear()
+        selectedFollowUpDateMillis = null
+        spinnerStatus.setText("New", false)
     }
     
     private fun addFirebaseLead() {
@@ -367,8 +396,13 @@ class LeadsFragment : Fragment() {
             else -> "new"
         }
         
-        // Add lead with status
-        leadsViewModel.addLead(fullName, email, contact, "", status)
+        // Convert follow-up date to Timestamp if selected
+        val followUpTimestamp = selectedFollowUpDateMillis?.let {
+            com.google.firebase.Timestamp(Date(it))
+        }
+        
+        // Add lead with status and follow-up date
+        leadsViewModel.addLead(fullName, email, contact, "", status, followUpTimestamp)
         
         // Clear form and hide modal
         clearForm()
@@ -410,12 +444,24 @@ class LeadsAdapter(
         private val tvReference = itemView.findViewById<android.widget.TextView>(R.id.tv_reference)
         private val tvName = itemView.findViewById<android.widget.TextView>(R.id.tv_name)
         private val tvAddress = itemView.findViewById<android.widget.TextView>(R.id.tv_address)
+        private val tvFollowUpDate = itemView.findViewById<android.widget.TextView>(R.id.tv_follow_up_date)
+        private val layoutFollowUp = itemView.findViewById<LinearLayout>(R.id.layout_follow_up)
         private val clickableArea = itemView.findViewById<LinearLayout>(R.id.clickable_area) ?: itemView
         
         fun bind(lead: FirebaseLead) {
             tvReference.text = lead.id ?: "N/A"
             tvName.text = lead.name
             tvAddress.text = lead.email
+            
+            // Display follow-up date if available
+            if (lead.followUpDate != null) {
+                layoutFollowUp.visibility = View.VISIBLE
+                val dateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.getDefault())
+                val followUpDateStr = dateFormat.format(lead.followUpDate.toDate())
+                tvFollowUpDate.text = "Follow-up: $followUpDateStr"
+            } else {
+                layoutFollowUp.visibility = View.GONE
+            }
             
             clickableArea.setOnClickListener { onLeadClick(lead) }
         }
