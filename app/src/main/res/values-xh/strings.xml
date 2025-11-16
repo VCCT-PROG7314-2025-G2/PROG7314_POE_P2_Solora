@@ -189,6 +189,7 @@
     <string name="password_requirement">Iphasiwedi kufuneka ibe neempawu ezingaphantsi kwezi-6</string>
     <string name="confirm">Qinisekisa</string>
     <string name="view_full_quote">Jonga Ikhwothi Epheleleyo</string>
+    <string name="name">Igama</string>
 
     <!-- Biometric Authentication -->
     <string name="biometric_prompt_title">Ungeniso Ngomnwe</string>

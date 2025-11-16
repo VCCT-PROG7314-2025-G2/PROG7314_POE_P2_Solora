@@ -466,7 +466,22 @@ class FirebaseRepository {
             Result.failure(e)
         }
     }
-    
+
+    suspend fun getLeadsForUser(userId: String): Result<List<FirebaseLead>> {
+        return try {
+            val snapshot = firestore.collection("leads")
+                .whereEqualTo("userId", userId)
+                .get()
+                .await()
+
+            val leads = snapshot.toObjects(FirebaseLead::class.java)
+            Result.success(leads)
+
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     /**
      * Get quotes via API with search support
      */

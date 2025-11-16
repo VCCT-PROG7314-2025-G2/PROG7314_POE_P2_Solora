@@ -97,7 +97,7 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2"
-                                android:text="@string/address_label"
+                                android:text="@string/name"
                                 android:textStyle="bold"
                                 android:textSize="14sp"
                                 android:textColor="#333333"
@@ -107,10 +107,10 @@
                                 android:layout_width="0dp"
                                 android:layout_height="wrap_content"
                                 android:layout_weight="2.5"
-                                android:text="@string/no_leads_yet"
+                                android:text="@string/email"
                                 android:textStyle="bold"
                                 android:textSize="14sp"
-                                android:textColor="#666666"
+                                android:textColor="#333333"
                                 android:layout_marginStart="8dp" />
                         </LinearLayout>
 

@@ -1,5 +1,8 @@
 package dev.solora.navigation
 
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +10,6 @@ import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
-import android.widget.ArrayAdapter
-import android.widget.AutoCompleteTextView
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.Toast
@@ -21,16 +22,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.firebase.auth.FirebaseAuth
 import dev.solora.R
+import dev.solora.SoloraApp
 import dev.solora.leads.LeadsViewModel
 import dev.solora.data.FirebaseLead
+import dev.solora.data.LocalLead
+import dev.solora.data.OfflineRepository
+import dev.solora.data.toFirebaseLead
 import kotlinx.coroutines.launch
+import java.util.UUID
 
 class LeadsFragment : Fragment() {
     
     private val leadsViewModel: LeadsViewModel by viewModels()
     private lateinit var leadsAdapter: LeadsAdapter
-    
+    private lateinit var offlineRepo: OfflineRepository
+
+
     // UI Elements
     private lateinit var rvLeads: RecyclerView
     private lateinit var layoutEmptyLeads: View
@@ -56,7 +65,9 @@ class LeadsFragment : Fragment() {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
+        // Initialize offline repository
+        offlineRepo = (requireActivity().application as SoloraApp).offlineRepo
         
         // Debug bottom navigation visibility
         debugBottomNavigation()
@@ -213,7 +224,7 @@ class LeadsFragment : Fragment() {
         }
         
         dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
-            // TODO: Show status update dialog
+
             Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
         }
         
@@ -316,15 +327,14 @@ class LeadsFragment : Fragment() {
         etEmail.text.clear()
         etContact.text.clear()
     }
-    
+
     private fun addFirebaseLead() {
         val firstName = etFirstName.text.toString().trim()
         val lastName = etLastName.text.toString().trim()
         val address = etAddress.text.toString().trim()
         val email = etEmail.text.toString().trim()
         val contact = etContact.text.toString().trim()
-        val source = "Other"
-        
+
         // Validation
         if (firstName.isEmpty()) {
             Toast.makeText(requireContext(), "Please enter first name", Toast.LENGTH_SHORT).show()
@@ -342,20 +352,58 @@ class LeadsFragment : Fragment() {
             Toast.makeText(requireContext(), "Please enter contact information", Toast.LENGTH_SHORT).show()
             return
         }
-        
-        // Generate reference number
-        val reference = generateFirebaseLeadReference()
+
+        val currentUserId = FirebaseAuth.getInstance().currentUser?.uid ?: run {
+            Toast.makeText(requireContext(), "You must be logged in to save a lead", Toast.LENGTH_SHORT).show()
+            return
+        }
+
         val fullName = "$firstName $lastName"
-        
-        // Add lead with separate email and phone fields
-        leadsViewModel.addLead(fullName, email, contact, "")
-        
-        // Clear form and hide modal
-        clearForm()
-        hideAddLeadModal()
-        Toast.makeText(requireContext(), "Lead added successfully!", Toast.LENGTH_SHORT).show()
+
+        // Build the LocalLead first (offline-first approach)
+        val localLead = LocalLead(
+            id = UUID.randomUUID().toString(),
+            name = fullName,
+            email = email,
+            phone = contact,
+            status = "New",
+            notes = "",
+            quoteId = null,
+            userId = currentUserId,
+            createdAt = System.currentTimeMillis(),
+            updatedAt = System.currentTimeMillis(),
+            synced = false
+        )
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            if (isOnline()) {
+                // ONLINE: convert LocalLead → FirebaseLead only for uploading
+                val firebaseLead = localLead.toFirebaseLead()
+                leadsViewModel.addLeadOnline(firebaseLead) // no need to capture result
+
+                Toast.makeText(requireContext(), "Lead saved!", Toast.LENGTH_SHORT).show()
+                leadsViewModel.refreshLeads()
+                clearForm()
+                hideAddLeadModal()
+            } else {
+                // OFFLINE: save LocalLead directly (no conversion)
+                leadsViewModel.addLeadOffline(localLead)
+
+                Toast.makeText(requireContext(), "Saved offline!", Toast.LENGTH_SHORT).show()
+                leadsViewModel.refreshLeads()
+                clearForm()
+                hideAddLeadModal()
+            }
+        }
     }
-    
+
+    private fun isOnline(): Boolean {
+        val connectivityManager = requireContext().getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+
     private fun generateFirebaseLeadReference(): String {
         // Generate a simple reference number
         return (10000..99999).random().toString()

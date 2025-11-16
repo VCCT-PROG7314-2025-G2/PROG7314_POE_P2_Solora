@@ -189,6 +189,7 @@
     <string name="password_requirement">Wagwoord moet minstens 6 karakters lank wees</string>
     <string name="confirm">Bevestig</string>
     <string name="view_full_quote">Bekyk Volledige Kwotasie</string>
+    <string name="name">Naam</string>
 
     <!-- Biometric Authentication -->
     <string name="biometric_prompt_title">Vingerafdruk Aanmelding</string>

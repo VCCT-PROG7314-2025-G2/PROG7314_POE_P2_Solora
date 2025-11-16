@@ -189,6 +189,7 @@
     <string name="password_requirement">Password must be at least 6 characters long</string>
     <string name="confirm">Confirm</string>
     <string name="view_full_quote">View Full Quote</string>
+    <string name="name">Name</string>
 
 
 
