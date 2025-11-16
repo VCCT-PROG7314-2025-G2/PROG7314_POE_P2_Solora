@@ -22,6 +22,10 @@ import java.io.IOException
 
 private val Context.dataStore by preferencesDataStore(name = "auth")
 
+/**
+ * Repository for authentication operations
+ * Handles Firebase Auth, user preferences, and biometric authentication setup
+ */
 class AuthRepository(private val context: Context) {
     private val firebaseAuth = FirebaseAuth.getInstance()
     private val firestore = FirebaseFirestore.getInstance()
@@ -47,6 +51,7 @@ class AuthRepository(private val context: Context) {
         prefs[KEY_HAS_SEEN_ONBOARDING] ?: false
     }
     
+    // Biometric is only enabled if both flag is set AND encrypted data exists
     val isBiometricEnabled: Flow<Boolean> = context.dataStore.data.catch { e ->
         if (e is IOException) emit(emptyPreferences()) else throw e
     }.map { prefs ->
@@ -106,16 +111,22 @@ class AuthRepository(private val context: Context) {
         }
     }
 
+    /**
+     * Register new user with email/password
+     * Creates Firebase Auth user and stores profile in Firestore
+     */
     suspend fun register(name: String, surname: String, email: String, password: String): Result<FirebaseUser> {
         return try {
             val result = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Registration failed: No user returned")
             
+            // Update Firebase Auth profile with display name
             val profileUpdates = com.google.firebase.auth.UserProfileChangeRequest.Builder()
                 .setDisplayName(name)
                 .build()
             user.updateProfile(profileUpdates).await()
             
+            // Store additional user data in Firestore
             val userDoc = hashMapOf(
                 "name" to name,
                 "surname" to surname,
@@ -281,6 +292,10 @@ class AuthRepository(private val context: Context) {
         }
     }
     
+    /**
+     * Verify biometric authentication by comparing stored email with current user
+     * Clears biometric data if mismatch detected (security measure)
+     */
     suspend fun authenticateWithStoredData(storedData: String): Result<String> {
         return try {
             val currentUser = firebaseAuth.currentUser
@@ -288,6 +303,7 @@ class AuthRepository(private val context: Context) {
                 updateLastLoginTime()
                 Result.success("User authenticated via biometric")
             } else {
+                // Security: clear biometric data if user doesn't match
                 clearBiometricData()
                 Result.failure(Exception("Biometric data mismatch - cleared for security"))
             }
@@ -308,6 +324,10 @@ class AuthRepository(private val context: Context) {
         }
     }
     
+    /**
+     * Check if user should be auto-logged out
+     * Returns true if user hasn't logged in for 30 days and "stay logged in" is disabled
+     */
     suspend fun shouldAutoLogout(): Boolean {
         val stayLoggedIn = stayLoggedIn.first()
         if (stayLoggedIn) return false
@@ -315,6 +335,7 @@ class AuthRepository(private val context: Context) {
         val dataStorePrefs = context.dataStore.data.first()
         val lastLoginTime = dataStorePrefs[KEY_LAST_LOGIN_TIME] ?: return false
         
+        // Auto-logout after 30 days of inactivity
         val thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000L
         val currentTime = System.currentTimeMillis()
         
