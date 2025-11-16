@@ -250,11 +250,54 @@ class LeadsFragment : Fragment() {
         }
         
         dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
-            // TODO: Show status update dialog
-            Toast.makeText(requireContext(), "Status update coming soon", Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+            showUpdateStatusDialog(lead)
         }
         
         dialog.show()
+    }
+    
+    private fun showUpdateStatusDialog(lead: FirebaseLead) {
+        val statusOptions = arrayOf("New", "Contacted", "Qualified", "Negotiating", "Closed - Won", "Closed - Lost")
+        val currentStatusDisplay = when (lead.status) {
+            "new" -> "New"
+            "contacted" -> "Contacted"
+            "qualified" -> "Qualified"
+            "negotiating" -> "Negotiating"
+            "closed_won" -> "Closed - Won"
+            "closed_lost" -> "Closed - Lost"
+            else -> "New"
+        }
+        
+        val currentIndex = statusOptions.indexOf(currentStatusDisplay)
+        var selectedIndex = currentIndex
+        
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Update Lead Status")
+            .setSingleChoiceItems(statusOptions, currentIndex) { _, which ->
+                selectedIndex = which
+            }
+            .setPositiveButton("Update") { _, _ ->
+                val newStatusDisplay = statusOptions[selectedIndex]
+                val newStatus = when (newStatusDisplay) {
+                    "New" -> "new"
+                    "Contacted" -> "contacted"
+                    "Qualified" -> "qualified"
+                    "Negotiating" -> "negotiating"
+                    "Closed - Won" -> "closed_won"
+                    "Closed - Lost" -> "closed_lost"
+                    else -> "new"
+                }
+                
+                if (newStatus != lead.status) {
+                    lead.id?.let { leadId ->
+                        leadsViewModel.updateLeadStatus(leadId, newStatus)
+                        Toast.makeText(requireContext(), "Status updated to $newStatusDisplay", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
     }
     
     private fun setupClickListeners() {

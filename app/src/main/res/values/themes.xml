@@ -5,6 +5,17 @@
         <item name="colorOnPrimary">@color/solora_on_primary</item>
         <item name="colorPrimaryContainer">@color/solora_orange_dark</item>
         <item name="android:navigationBarColor">@color/solora_orange</item>
+        <item name="materialCalendarTheme">@style/ThemeOverlay.Solora.DatePicker</item>
+    </style>
+    
+    <!-- Date Picker Theme with Solora Orange -->
+    <style name="ThemeOverlay.Solora.DatePicker" parent="ThemeOverlay.Material3.MaterialCalendar">
+        <item name="colorPrimary">@color/solora_orange</item>
+        <item name="colorOnPrimary">@android:color/white</item>
+        <item name="colorSurface">@android:color/white</item>
+        <item name="colorOnSurface">@android:color/black</item>
+        <item name="materialCalendarHeaderSelection">@color/solora_orange</item>
+        <item name="materialCalendarHeaderTitle">@color/solora_orange</item>
     </style>
 </resources>
 

@@ -29,7 +29,8 @@
                 android:textSize="14sp"
                 android:textColor="#333333"
                 android:singleLine="true"
-                android:ellipsize="end" />
+                android:ellipsize="end"
+                android:paddingEnd="12dp" />
 
             <TextView
                 android:id="@+id/tv_name"
@@ -41,7 +42,8 @@
                 android:textColor="#333333"
                 android:singleLine="true"
                 android:ellipsize="end"
-                android:layout_marginStart="8dp" />
+                android:paddingStart="4dp"
+                android:paddingEnd="12dp" />
 
             <TextView
                 android:id="@+id/tv_address"
@@ -53,7 +55,7 @@
                 android:textColor="#333333"
                 android:singleLine="true"
                 android:ellipsize="end"
-                android:layout_marginStart="8dp" />
+                android:paddingStart="4dp" />
         </LinearLayout>
 
         <!-- Follow-up Date Row -->
