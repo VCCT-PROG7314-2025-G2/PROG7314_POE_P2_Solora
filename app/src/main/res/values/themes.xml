@@ -24,15 +24,19 @@
     
     <!-- Compact calendar header layout -->
     <style name="Widget.Solora.MaterialCalendar.HeaderLayout" parent="Widget.Material3.MaterialCalendar.HeaderLayout">
-        <item name="android:paddingTop">4dp</item>
-        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingTop">0dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
     </style>
     
     <!-- Compact calendar header title -->
     <style name="Widget.Solora.MaterialCalendar.HeaderTitle" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
-        <item name="android:textSize">18sp</item>
+        <item name="android:textSize">16sp</item>
         <item name="android:paddingTop">0dp</item>
-        <item name="android:paddingBottom">4dp</item>
+        <item name="android:paddingBottom">0dp</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginBottom">0dp</item>
     </style>
     
     <!-- Orange text buttons for date picker -->

@@ -251,14 +251,13 @@ class LeadsFragment : Fragment() {
         }
         
         dialogView.findViewById<Button>(R.id.btn_update_status).setOnClickListener {
-            dialog.dismiss()
-            showUpdateStatusDialog(lead, tvLeadStatus)
+            showUpdateStatusDialog(lead, dialog)
         }
         
         dialog.show()
     }
     
-    private fun showUpdateStatusDialog(lead: FirebaseLead, statusTextView: TextView? = null) {
+    private fun showUpdateStatusDialog(lead: FirebaseLead, parentDialog: androidx.appcompat.app.AlertDialog) {
         val dialogView = LayoutInflater.from(requireContext()).inflate(R.layout.dialog_status_selection, null)
         val radioGroup = dialogView.findViewById<android.widget.RadioGroup>(R.id.radio_group_status)
         val btnUpdate = dialogView.findViewById<Button>(R.id.btn_update)
@@ -315,13 +314,15 @@ class LeadsFragment : Fragment() {
                     leadsViewModel.updateLeadStatus(leadId, selectedStatus)
                     val displayName = statusOptions.find { it.second == selectedStatus }?.first ?: selectedStatus
                     
-                    // Update the status TextView immediately if provided
-                    statusTextView?.text = selectedStatus.uppercase()
-                    
                     Toast.makeText(requireContext(), "Status updated to $displayName", Toast.LENGTH_SHORT).show()
+                    
+                    // Close both dialogs so when user reopens, they see updated status
+                    dialog.dismiss()
+                    parentDialog.dismiss()
                 }
+            } else {
+                dialog.dismiss()
             }
-            dialog.dismiss()
         }
         
         dialog.show()
