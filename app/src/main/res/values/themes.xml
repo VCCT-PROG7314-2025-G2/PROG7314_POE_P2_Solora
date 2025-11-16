@@ -33,7 +33,7 @@
     <!-- Compact calendar header title -->
     <style name="Widget.Solora.MaterialCalendar.HeaderTitle" parent="Widget.Material3.MaterialCalendar.HeaderTitle">
         <item name="android:textSize">16sp</item>
-        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingTop">48dp</item>
         <item name="android:paddingBottom">8dp</item>
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginBottom">0dp</item>
