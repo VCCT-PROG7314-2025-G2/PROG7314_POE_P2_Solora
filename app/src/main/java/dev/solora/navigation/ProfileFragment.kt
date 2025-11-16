@@ -206,9 +206,11 @@ class ProfileFragment : Fragment() {
     
     private fun loadFingerprintSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
-            isInitializingFingerprint = true
             authViewModel.isBiometricEnabled.collect { isEnabled ->
+                isInitializingFingerprint = true
                 switchFingerprint.isChecked = isEnabled
+                // Delay to ensure the switch listener doesn't fire during initialization
+                kotlinx.coroutines.delay(100)
                 isInitializingFingerprint = false
             }
         }
