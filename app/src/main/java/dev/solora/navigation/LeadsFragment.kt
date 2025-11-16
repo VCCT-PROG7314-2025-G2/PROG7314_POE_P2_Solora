@@ -166,7 +166,7 @@ class LeadsFragment : Fragment() {
     private fun setupFollowUpDatePicker() {
         etFollowUpDate.setOnClickListener {
             val datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Select Follow-up Date")
+                .setTitleText("") // Remove title to prevent overlap
                 .setSelection(selectedFollowUpDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds())
                 .setTheme(R.style.ThemeOverlay_Solora_DatePicker)
                 .build()
@@ -311,14 +311,19 @@ class LeadsFragment : Fragment() {
         btnUpdate.setOnClickListener {
             if (selectedStatus != lead.status) {
                 lead.id?.let { leadId ->
-                    leadsViewModel.updateLeadStatus(leadId, selectedStatus)
                     val displayName = statusOptions.find { it.second == selectedStatus }?.first ?: selectedStatus
                     
-                    Toast.makeText(requireContext(), "Status updated to $displayName", Toast.LENGTH_SHORT).show()
+                    // Update status in Firebase
+                    leadsViewModel.updateLeadStatus(leadId, selectedStatus)
                     
-                    // Close both dialogs so when user reopens, they see updated status
+                    // Close both dialogs
                     dialog.dismiss()
                     parentDialog.dismiss()
+                    
+                    // Show toast after closing dialogs
+                    Toast.makeText(requireContext(), "Status updated to $displayName", Toast.LENGTH_SHORT).show()
+                    
+                    // Real-time Firestore listener will automatically update the list
                 }
             } else {
                 dialog.dismiss()

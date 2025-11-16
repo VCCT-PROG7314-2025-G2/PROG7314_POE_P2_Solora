@@ -28,22 +28,11 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     // Firebase leads flow - filtered by logged-in user's ID
+    // Using real-time Firestore listener for automatic updates
     val leads = flow {
         // Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
-        // Try API first, fallback to direct Firestore
-        try {
-            val apiResult = firebaseRepository.getLeadsViaApi()
-            if (apiResult.isSuccess) {
-                // Using API for leads
-                emitAll(flowOf(apiResult.getOrNull() ?: emptyList()))
-            } else {
-                // API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}
-                emitAll(firebaseRepository.getLeads())
-            }
-        } catch (e: Exception) {
-            // API error, using direct Firestore: ${e.message}
-            emitAll(firebaseRepository.getLeads())
-        }
+        // Use direct Firestore with real-time listener for automatic updates
+        emitAll(firebaseRepository.getLeads())
     }.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
