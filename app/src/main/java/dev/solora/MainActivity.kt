@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.lifecycleScope
-import androidx.appcompat.app.AppCompatDelegate
 import dev.solora.api.FirebaseFunctionsApi
 import dev.solora.data.FirebaseRepository
 import kotlinx.coroutines.launch
@@ -18,11 +17,6 @@ class MainActivity : FragmentActivity() {
     
     private val firebaseRepository = FirebaseRepository()
     private val apiService = FirebaseFunctionsApi()
-    
-    companion object {
-        private const val PREFS_NAME = "solora_settings"
-        private const val KEY_DARK_MODE = "dark_mode_enabled"
-    }
 
     override fun attachBaseContext(newBase: Context) {
         val sharedPrefs = newBase.getSharedPreferences("Settings", Context.MODE_PRIVATE)
@@ -31,33 +25,13 @@ class MainActivity : FragmentActivity() {
         super.attachBaseContext(context)
     }
 
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // Apply dark mode before setting content view
-        applyDarkModeSettings()
-        
         setContentView(R.layout.activity_main)
         
         // Check if our API is working when the app starts
         // This makes sure everything is connected properly
         performStartupChecks()
-    }
-    
-    private fun applyDarkModeSettings() {
-        try {
-            val sharedPrefs = getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-            val isDarkMode = sharedPrefs.getBoolean(KEY_DARK_MODE, false)
-            if (isDarkMode) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-            }
-        } catch (e: Exception) {
-            // Default to light mode if there's an error
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
     }
     
     private fun performStartupChecks() {
