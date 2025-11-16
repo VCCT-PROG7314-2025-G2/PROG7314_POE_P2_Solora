@@ -18,10 +18,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputEditText
 import com.google.firebase.auth.FirebaseAuth
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.datastore.preferences.core.booleanPreferencesKey
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
-import kotlinx.coroutines.flow.first
 import dev.solora.R
 import kotlinx.coroutines.tasks.await
 import dev.solora.profile.ProfileViewModel
@@ -31,8 +27,7 @@ import dev.solora.api.FirebaseFunctionsApi
 import dev.solora.notifications.MotivationalNotificationManager
 import dev.solora.profile.LocaleHelper
 import kotlinx.coroutines.launch
-
-private val Context.darkModeDataStore by preferencesDataStore(name = "dark_mode_settings")
+import android.content.SharedPreferences
 
 class ProfileFragment : Fragment() {
     private val profileViewModel: ProfileViewModel by viewModels()
@@ -40,7 +35,8 @@ class ProfileFragment : Fragment() {
     private val authViewModel: AuthViewModel by viewModels()
 
     companion object {
-        private val KEY_DARK_MODE = booleanPreferencesKey("dark_mode_enabled")
+        private const val PREFS_NAME = "solora_settings"
+        private const val KEY_DARK_MODE = "dark_mode_enabled"
     }
 
     private lateinit var notificationManager: MotivationalNotificationManager
@@ -330,29 +326,25 @@ class ProfileFragment : Fragment() {
     }
     
     private fun loadDarkModeSettings() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            isInitializingDarkMode = true
-            val isDarkMode = requireContext().darkModeDataStore.data.first()[KEY_DARK_MODE] ?: false
-            switchDarkMode.isChecked = isDarkMode
-            isInitializingDarkMode = false
-        }
+        isInitializingDarkMode = true
+        val sharedPrefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val isDarkMode = sharedPrefs.getBoolean(KEY_DARK_MODE, false)
+        switchDarkMode.isChecked = isDarkMode
+        isInitializingDarkMode = false
     }
     
     private fun handleDarkModeToggle(enabled: Boolean) {
         if (isInitializingDarkMode) return
         
-        viewLifecycleOwner.lifecycleScope.launch {
-            requireContext().darkModeDataStore.edit { prefs ->
-                prefs[KEY_DARK_MODE] = enabled
-            }
-            
-            if (enabled) {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-                Toast.makeText(requireContext(), "Dark mode enabled", Toast.LENGTH_SHORT).show()
-            } else {
-                AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-                Toast.makeText(requireContext(), "Dark mode disabled", Toast.LENGTH_SHORT).show()
-            }
+        val sharedPrefs = requireContext().getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        sharedPrefs.edit().putBoolean(KEY_DARK_MODE, enabled).apply()
+        
+        if (enabled) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+            Toast.makeText(requireContext(), "Dark mode enabled", Toast.LENGTH_SHORT).show()
+        } else {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+            Toast.makeText(requireContext(), "Dark mode disabled", Toast.LENGTH_SHORT).show()
         }
     }
     
