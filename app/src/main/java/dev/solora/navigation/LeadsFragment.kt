@@ -519,7 +519,7 @@ class LeadsAdapter(
     inner class LeadViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         private val tvReference = itemView.findViewById<android.widget.TextView>(R.id.tv_reference)
         private val tvName = itemView.findViewById<android.widget.TextView>(R.id.tv_name)
-        private val tvAddress = itemView.findViewById<android.widget.TextView>(R.id.tv_address)
+        private val tvEmail = itemView.findViewById<android.widget.TextView>(R.id.tv_email)
         private val tvFollowUpDate = itemView.findViewById<android.widget.TextView>(R.id.tv_follow_up_date)
         private val layoutFollowUp = itemView.findViewById<LinearLayout>(R.id.layout_follow_up)
         private val clickableArea = itemView.findViewById<LinearLayout>(R.id.clickable_area) ?: itemView
@@ -527,7 +527,7 @@ class LeadsAdapter(
         fun bind(lead: FirebaseLead) {
             tvReference.text = lead.id ?: "N/A"
             tvName.text = lead.name
-            tvAddress.text = lead.email
+            tvEmail.text = if (lead.email.isNotEmpty()) lead.email else "No email"
             
             // Display follow-up date if available
             if (lead.followUpDate != null) {

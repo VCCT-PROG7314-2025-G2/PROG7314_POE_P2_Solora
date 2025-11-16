@@ -46,11 +46,11 @@
                 android:paddingEnd="12dp" />
 
             <TextView
-                android:id="@+id/tv_address"
+                android:id="@+id/tv_email"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="2.5"
-                android:text="123 Main St"
+                android:text="email@example.com"
                 android:textSize="14sp"
                 android:textColor="#333333"
                 android:singleLine="true"
