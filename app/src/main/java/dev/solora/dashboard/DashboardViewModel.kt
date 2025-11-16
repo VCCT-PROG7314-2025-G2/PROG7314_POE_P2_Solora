@@ -12,6 +12,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlin.Result
 
+/**
+ * ViewModel for dashboard statistics
+ * Aggregates quote data to show totals, averages, and recent activity
+ */
 class DashboardViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
 
@@ -34,19 +38,17 @@ class DashboardViewModel(app: Application) : AndroidViewModel(app) {
             _error.value = null
 
             try {
-                
-                // Try API first, fallback to direct Firestore
+                // Try API first for better performance, fallback to direct Firestore
                 val apiResult = firebaseRepository.getQuotesViaApi()
                 val quotes = if (apiResult.isSuccess) {
                     apiResult.getOrNull() ?: emptyList()
                 } else {
-                    // Fallback to direct Firestore - collect the flow
+                    // Fallback to direct Firestore real-time listener
                     val directFlow = firebaseRepository.getQuotes()
                     directFlow.first() // Get the first emission from the flow
                 }
 
-                
-                // Convert API response to FirebaseQuote objects if needed
+                // Convert API response (Map) to FirebaseQuote objects if needed
                 val firebaseQuotes = if (quotes.isNotEmpty() && quotes.first() is Map<*, *>) {
                     // Convert API response to FirebaseQuote objects
                     quotes.mapNotNull { quoteMap ->
