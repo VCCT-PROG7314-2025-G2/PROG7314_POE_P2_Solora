@@ -77,6 +77,20 @@ class AuthRepository(private val context: Context) {
             val result = firebaseAuth.signInWithEmailAndPassword(email, password).await()
             val user = result.user ?: throw Exception("Login failed: No user returned")
             
+            // Get and update FCM token for push notifications
+            val fcmToken = try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
+            
+            // Update FCM token in Firestore
+            if (fcmToken != null) {
+                firestore.collection("users").document(user.uid)
+                    .update("fcmToken", fcmToken)
+                    .await()
+            }
+            
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
                 prefs[KEY_EMAIL] = user.email ?: email
@@ -126,14 +140,27 @@ class AuthRepository(private val context: Context) {
                 .build()
             user.updateProfile(profileUpdates).await()
             
+            // Get FCM token for push notifications
+            val fcmToken = try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
+            
             // Store additional user data in Firestore
             val userDoc = hashMapOf(
                 "name" to name,
                 "surname" to surname,
                 "email" to email,
+                "fcmToken" to fcmToken,
                 "createdAt" to com.google.firebase.Timestamp.now()
             )
             firestore.collection("users").document(user.uid).set(userDoc).await()
+            
+            // Initialize user_settings with notifications enabled by default
+            firestore.collection("user_settings").document(user.uid)
+                .set(mapOf("notificationsEnabled" to true), com.google.firebase.firestore.SetOptions.merge())
+                .await()
             
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
@@ -160,13 +187,27 @@ class AuthRepository(private val context: Context) {
             val firstName = nameParts.getOrNull(0) ?: ""
             val lastName = if (nameParts.size > 1) nameParts.subList(1, nameParts.size).joinToString(" ") else ""
 
+            // Get FCM token for push notifications
+            val fcmToken = try {
+                com.google.firebase.messaging.FirebaseMessaging.getInstance().token.await()
+            } catch (e: Exception) {
+                null
+            }
+
             val userDoc = hashMapOf(
                 "name" to firstName,
                 "surname" to lastName,
-                "email" to (user.email ?: "")
+                "email" to (user.email ?: ""),
+                "fcmToken" to fcmToken,
+                "createdAt" to com.google.firebase.Timestamp.now()
             )
 
             firestore.collection("users").document(user.uid).set(userDoc).await()
+
+            // Initialize user_settings with notifications enabled by default
+            firestore.collection("user_settings").document(user.uid)
+                .set(mapOf("notificationsEnabled" to true), com.google.firebase.firestore.SetOptions.merge())
+                .await()
 
             context.dataStore.edit { prefs ->
                 prefs[KEY_USER_ID] = user.uid
