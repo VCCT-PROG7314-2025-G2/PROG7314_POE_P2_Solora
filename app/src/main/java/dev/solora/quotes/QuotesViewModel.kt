@@ -23,6 +23,10 @@ import dev.solora.settings.SettingsRepository
 import dev.solora.notifications.MotivationalNotificationManager
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * ViewModel for quote calculations and management
+ * Handles NASA API integration, geocoding, and quote persistence
+ */
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
     private val nasa = NasaPowerClient()
@@ -39,7 +43,10 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // Firebase quotes flow - filtered by logged-in user's ID
+    /**
+     * Real-time flow of quotes for current user
+     * Tries API first, falls back to Firestore listener
+     */
     val quotes = flow {
         // Starting quotes flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
         // Try API first, fallback to direct Firestore
@@ -71,7 +78,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val _lastCalculation = MutableStateFlow<QuoteOutputs?>(null)
     val lastCalculation: StateFlow<QuoteOutputs?> = _lastCalculation.asStateFlow()
 
-    // Enhanced calculation with NASA API integration
+    /**
+     * Calculate solar quote with NASA API integration
+     * Geocodes address if coordinates not provided, fetches solar irradiance data,
+     * and calculates system specifications
+     */
     fun calculateAdvanced(
         reference: String,
         clientName: String,
@@ -93,9 +104,8 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 var finalAddress = address
                 var finalSunHours = sunHours
                 
-                // If coordinates not provided, try to geocode the address
+                // Geocode address to get coordinates if not provided
                 if (finalLatitude == null || finalLongitude == null) {
-                    // Geocoding address: $address
                     val geocodeResult = geocodingService.getCoordinatesFromAddress(address)
                     
                     if (geocodeResult.success) {
@@ -109,7 +119,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     }
                 }
                 
-                // If we have coordinates, try to get NASA sun hours data
+                // Fetch NASA solar irradiance data if coordinates available
                 if (finalLatitude != null && finalLongitude != null) {
                     try {
                         val nasaDataResult = nasa.getSolarDataWithFallback(finalLatitude, finalLongitude)
@@ -142,17 +152,14 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     } else null
                 )
 
-                // Starting calculation with NASA API integration
-                // Input values: usageKwh=$usageKwh, billRands=$billRands, tariff=$tariff, panelWatt=$panelWatt, sunHours=$finalSunHours
-                
-                // Get current settings
+                // Get calculation settings (tariffs, performance ratios, etc.)
                 val settings = settingsRepository.settings.stateIn(
                     viewModelScope,
                     SharingStarted.WhileSubscribed(5000),
                     dev.solora.settings.AppSettings()
                 ).value.calculationSettings
                 
-                // Try API calculation first, fallback to local calculation
+                // Try server-side calculation first (includes NASA API), fallback to local
                 val apiResult = firebaseRepository.calculateQuoteViaApi(
                     address = finalAddress,
                     usageKwh = usageKwh,
@@ -242,7 +249,10 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
 
-    // Save quote from calculation results
+    /**
+     * Save quote to database from calculation results
+     * Includes NASA data, location info, and company settings snapshot
+     */
     fun saveQuoteFromCalculation(
         reference: String,
         clientName: String,
