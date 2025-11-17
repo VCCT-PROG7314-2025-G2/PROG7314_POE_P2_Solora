@@ -335,16 +335,44 @@ class AuthRepository(private val context: Context) {
     
     /**
      * Verify biometric authentication by comparing stored email with current user
-     * Clears biometric data if mismatch detected (security measure)
+     * Handles both active sessions and expired sessions by validating against DataStore
      */
     suspend fun authenticateWithStoredData(storedData: String): Result<String> {
         return try {
+            // First, try to reload the current user to refresh the session
+            try {
+                firebaseAuth.currentUser?.reload()?.await()
+            } catch (e: Exception) {
+                // Reload failed, session likely expired
+            }
+            
             val currentUser = firebaseAuth.currentUser
-            if (currentUser != null && currentUser.email == storedData) {
+            
+            // If user is still logged in after reload, verify email matches
+            if (currentUser != null) {
+                if (currentUser.email == storedData) {
+                    updateLastLoginTime()
+                    return Result.success("User authenticated via biometric")
+                } else {
+                    // Email mismatch with active session - security issue
+                    clearBiometricData()
+                    return Result.failure(Exception("Biometric data mismatch - cleared for security"))
+                }
+            }
+            
+            // No active Firebase session - verify stored email matches DataStore
+            val dataStorePrefs = context.dataStore.data.first()
+            val storedEmail = dataStorePrefs[KEY_EMAIL]
+            val storedUserId = dataStorePrefs[KEY_USER_ID]
+            
+            if (storedEmail == storedData && !storedUserId.isNullOrEmpty()) {
+                // Email matches and we have user data - allow biometric login
+                // Firebase session will be restored when app makes first authenticated call
                 updateLastLoginTime()
+                
                 Result.success("User authenticated via biometric")
             } else {
-                // Security: clear biometric data if user doesn't match
+                // Email mismatch or no stored user - security issue
                 clearBiometricData()
                 Result.failure(Exception("Biometric data mismatch - cleared for security"))
             }
