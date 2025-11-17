@@ -1,67 +1,78 @@
 package dev.solora.quotes
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.launch
-import dev.solora.data.FirebaseQuote
-import dev.solora.data.FirebaseRepository
+import com.google.firebase.auth.FirebaseAuth
+import dev.solora.SoloraApp
+import dev.solora.data.*
+import dev.solora.notifications.MotivationalNotificationManager
+import dev.solora.quote.GeocodingService
 import dev.solora.quote.NasaPowerClient
 import dev.solora.quote.QuoteCalculator
 import dev.solora.quote.QuoteInputs
-import dev.solora.quote.GeocodingService
 import dev.solora.quote.QuoteOutputs
 import dev.solora.settings.SettingsRepository
-import dev.solora.notifications.MotivationalNotificationManager
-import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 /**
  * ViewModel for quote calculations and management
- * Handles NASA API integration, geocoding, and quote persistence
+ * Handles NASA API integration, geocoding, and quote persistence with offline support
  */
 class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
+    private val offlineRepository = (app as SoloraApp).offlineRepository
+    private val networkMonitor = (app as SoloraApp).networkMonitor
     private val nasa = NasaPowerClient()
     private val calculator = QuoteCalculator
     private val geocodingService = GeocodingService(app)
     private val settingsRepository = SettingsRepository()
     private val notificationManager = MotivationalNotificationManager(app)
 
+    companion object {
+        private const val TAG = "QuotesViewModel"
+    }
+
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        // QuotesViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}
+        Log.d(TAG, "QuotesViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}")
         if (currentUser == null) {
-            // WARNING: No user logged in! Quotes will be empty.
+            Log.w(TAG, "WARNING: No user logged in! Quotes will be empty.")
         }
     }
 
     /**
-     * Real-time flow of quotes for current user
-     * Tries API first, falls back to Firestore listener
+     * Combined quotes flow - merges Firebase and local data
+     * Shows local data immediately, then syncs with Firebase when online
      */
     val quotes = flow {
-        // Starting quotes flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
-        // Try API first, fallback to direct Firestore
-        try {
-            val apiResult = firebaseRepository.getQuotesViaApi()
-            if (apiResult.isSuccess) {
-                // Using API for quotes
-                emitAll(flowOf(apiResult.getOrNull() ?: emptyList()))
-            } else {
-                // API failed, using direct Firestore: ${apiResult.exceptionOrNull()?.message}
-                emitAll(firebaseRepository.getQuotes())
-            }
-        } catch (e: Exception) {
-            // API error, using direct Firestore: ${e.message}
-            emitAll(firebaseRepository.getQuotes())
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        Log.d(TAG, "Starting quotes flow for user: $userId")
+        
+        if (userId == null) {
+            Log.w(TAG, "No user logged in")
+            emit(emptyList())
+            return@flow
+        }
+        
+        // First emit local data for instant display
+        val localQuotes = offlineRepository.getLocalQuotes()
+        Log.d(TAG, "Loaded ${localQuotes.size} quotes from local database")
+        emit(localQuotes.map { it.toFirebaseQuote() })
+        
+        // Then listen to Firebase for real-time updates
+        firebaseRepository.getQuotes().collect { firebaseQuotes ->
+            Log.d(TAG, "Received ${firebaseQuotes.size} quotes from Firebase")
+            
+            // Save Firebase quotes to local database for offline access
+            val localQuotes = firebaseQuotes.map { it.toLocalQuote(synced = true) }
+            offlineRepository.saveQuotesOffline(localQuotes)
+            
+            // Emit the Firebase quotes
+            emit(firebaseQuotes)
         }
     }.stateIn(
         viewModelScope, 
@@ -221,7 +232,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     ) {
         viewModelScope.launch {
             try {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                val quoteId = UUID.randomUUID().toString()
+                
                 val quote = FirebaseQuote(
+                    id = quoteId,
                     reference = reference,
                     clientName = clientName,
                     address = address,
@@ -233,18 +248,36 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     estimatedGeneration = estimatedGeneration,
                     paybackMonths = paybackMonths,
                     monthlySavings = monthlySavings,
-                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    userId = userId
                 )
 
-                val result = firebaseRepository.saveQuote(quote)
-                if (result.isSuccess) {
-                    _lastQuote.value = quote.copy(id = result.getOrNull())
-                    viewModelScope.launch {
+                // Check if online
+                val isOnline = networkMonitor.isCurrentlyConnected()
+                Log.d(TAG, "Saving quote, online status: $isOnline")
+                
+                if (isOnline) {
+                    // Try to save to Firebase first
+                    val result = firebaseRepository.saveQuote(quote)
+                    if (result.isSuccess) {
+                        Log.d(TAG, "Quote saved to Firebase successfully")
+                        _lastQuote.value = quote.copy(id = result.getOrNull())
+                        // Also save to local database (marked as synced)
+                        offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = true))
                         notificationManager.checkAndSendMotivationalMessage()
+                    } else {
+                        Log.e(TAG, "Failed to save quote to Firebase: ${result.exceptionOrNull()?.message}")
+                        // Save locally as unsynced
+                        offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = false))
+                        _lastQuote.value = quote
                     }
+                } else {
+                    // Offline - save to local database only (unsynced)
+                    Log.d(TAG, "Offline - saving quote to local database")
+                    offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = false))
+                    _lastQuote.value = quote
                 }
             } catch (e: Exception) {
-                // ("QuotesViewModel", "Error saving quote: ${e.message}", e)
+                Log.e(TAG, "Error saving quote: ${e.message}", e)
             }
         }
     }

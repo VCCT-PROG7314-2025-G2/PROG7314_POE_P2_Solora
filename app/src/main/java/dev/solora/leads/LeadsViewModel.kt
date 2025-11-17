@@ -1,38 +1,64 @@
 package dev.solora.leads
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import dev.solora.data.FirebaseLead
-import dev.solora.data.FirebaseRepository
-import dev.solora.notifications.MotivationalNotificationManager
-import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.stateIn
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.flow.emitAll
-import kotlinx.coroutines.launch
 import com.google.firebase.auth.FirebaseAuth
+import dev.solora.SoloraApp
+import dev.solora.data.*
+import dev.solora.notifications.MotivationalNotificationManager
+import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.UUID
 
 class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     private val firebaseRepository = FirebaseRepository()
+    private val offlineRepository = (app as SoloraApp).offlineRepository
+    private val networkMonitor = (app as SoloraApp).networkMonitor
     private val notificationManager = MotivationalNotificationManager(app.applicationContext)
     private var leadsForSelection: List<FirebaseLead> = emptyList()
 
+    companion object {
+        private const val TAG = "LeadsViewModel"
+    }
+
     init {
         val currentUser = FirebaseAuth.getInstance().currentUser
-        // LeadsViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}
+        Log.d(TAG, "LeadsViewModel initialized for user: ${currentUser?.uid ?: "NOT LOGGED IN"}")
         if (currentUser == null) {
-            // WARNING: No user logged in! Leads will be empty.
+            Log.w(TAG, "WARNING: No user logged in! Leads will be empty.")
         }
     }
 
-    // Firebase leads flow - filtered by logged-in user's ID
-    // Using real-time Firestore listener for automatic updates
+    // Combined leads flow - merges Firebase and local data
+    // Shows local data immediately, then syncs with Firebase when online
     val leads = flow {
-        // Starting leads flow for user: ${FirebaseAuth.getInstance().currentUser?.uid}
-        // Use direct Firestore with real-time listener for automatic updates
-        emitAll(firebaseRepository.getLeads())
+        val userId = FirebaseAuth.getInstance().currentUser?.uid
+        Log.d(TAG, "Starting leads flow for user: $userId")
+        
+        if (userId == null) {
+            Log.w(TAG, "No user logged in")
+            emit(emptyList())
+            return@flow
+        }
+        
+        // First emit local data for instant display
+        val localLeads = offlineRepository.getLocalLeads()
+        Log.d(TAG, "Loaded ${localLeads.size} leads from local database")
+        emit(localLeads.map { it.toFirebaseLead() })
+        
+        // Then listen to Firebase for real-time updates
+        firebaseRepository.getLeads().collect { firebaseLeads ->
+            Log.d(TAG, "Received ${firebaseLeads.size} leads from Firebase")
+            
+            // Save Firebase leads to local database for offline access
+            val localLeads = firebaseLeads.map { it.toLocalLead(synced = true) }
+            offlineRepository.saveLeadsOffline(localLeads)
+            
+            // Emit the Firebase leads
+            emit(firebaseLeads)
+        }
     }.stateIn(
         viewModelScope, 
         SharingStarted.WhileSubscribed(5000), 
@@ -40,21 +66,46 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     )
 
     fun addLead(name: String, email: String, phone: String, notes: String = "", status: String = "new", followUpDate: com.google.firebase.Timestamp? = null) {
-        viewModelScope.launch { 
+        viewModelScope.launch {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid
+            if (userId == null) {
+                Log.e(TAG, "Cannot add lead: No user logged in")
+                return@launch
+            }
+            
+            val leadId = UUID.randomUUID().toString()
             val lead = FirebaseLead(
+                id = leadId,
                 name = name,
                 email = email,
                 phone = phone,
                 status = status,
                 notes = notes,
-                followUpDate = followUpDate
+                followUpDate = followUpDate,
+                userId = userId
             )
             
-            val result = firebaseRepository.saveLead(lead)
-            if (result.isSuccess) {
-                notificationManager.checkAndSendLeadMessage()
+            // Check if online
+            val isOnline = networkMonitor.isCurrentlyConnected()
+            Log.d(TAG, "Adding lead, online status: $isOnline")
+            
+            if (isOnline) {
+                // Try to save to Firebase first
+                val result = firebaseRepository.saveLead(lead)
+                if (result.isSuccess) {
+                    Log.d(TAG, "Lead saved to Firebase successfully")
+                    // Also save to local database (marked as synced)
+                    offlineRepository.saveLeadOffline(lead.toLocalLead(synced = true))
+                    notificationManager.checkAndSendLeadMessage()
+                } else {
+                    Log.e(TAG, "Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}")
+                    // Save locally as unsynced
+                    offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
+                }
             } else {
-                // Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}
+                // Offline - save to local database only (unsynced)
+                Log.d(TAG, "Offline - saving lead to local database")
+                offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
             }
         }
     }
@@ -62,28 +113,50 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
     fun updateLeadStatus(leadId: String, status: String, notes: String = "") {
         viewModelScope.launch {
             try {
-                // Get current lead
-                val result = firebaseRepository.getLeadById(leadId)
-                if (result.isSuccess) {
-                    val currentLead = result.getOrNull()
-                    if (currentLead != null) {
-                        val updatedLead = currentLead.copy(
-                            status = status,
-                            notes = notes.ifEmpty { currentLead.notes }
-                        )
-                        
-                        val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
-                        if (updateResult.isSuccess) {
-                            // Lead status updated in Firebase
-                        } else {
-                            // Failed to update lead status in Firebase: ${updateResult.exceptionOrNull()?.message}
+                Log.d(TAG, "Updating lead status: $leadId to $status")
+                
+                // Check if online
+                val isOnline = networkMonitor.isCurrentlyConnected()
+                
+                if (isOnline) {
+                    // Get current lead from Firebase
+                    val result = firebaseRepository.getLeadById(leadId)
+                    if (result.isSuccess) {
+                        val currentLead = result.getOrNull()
+                        if (currentLead != null) {
+                            val updatedLead = currentLead.copy(
+                                status = status,
+                                notes = notes.ifEmpty { currentLead.notes }
+                            )
+                            
+                            val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                            if (updateResult.isSuccess) {
+                                Log.d(TAG, "Lead status updated in Firebase")
+                                // Update local database
+                                offlineRepository.saveLeadOffline(updatedLead.toLocalLead(synced = true))
+                            } else {
+                                Log.e(TAG, "Failed to update lead status in Firebase: ${updateResult.exceptionOrNull()?.message}")
+                            }
                         }
                     }
                 } else {
-                    // Failed to get lead: ${result.exceptionOrNull()?.message}
+                    // Offline - update local database only (mark as unsynced)
+                    Log.d(TAG, "Offline - updating lead in local database")
+                    // Get from local database
+                    val localLeads = offlineRepository.getLocalLeads()
+                    val localLead = localLeads.find { it.id == leadId }
+                    if (localLead != null) {
+                        val updatedLead = localLead.copy(
+                            status = status,
+                            notes = notes.ifEmpty { localLead.notes },
+                            synced = false,
+                            updatedAt = System.currentTimeMillis()
+                        )
+                        offlineRepository.updateLeadOffline(updatedLead)
+                    }
                 }
             } catch (e: Exception) {
-                // Error updating lead status: ${e.message}
+                Log.e(TAG, "Error updating lead status: ${e.message}", e)
             }
         }
     }
