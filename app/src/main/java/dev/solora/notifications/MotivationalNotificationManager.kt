@@ -129,41 +129,37 @@ class MotivationalNotificationManager(private val context: Context) {
 
     private fun generateMotivationalMessage(quoteCount: Int): Pair<String, String>? {
         return when {
-            quoteCount == 1 -> {
-                "Congratulations!" to "You've created your first quote! You're on your way to solar success!"
-            }
-            quoteCount in 2..4 -> {
-                "Great progress!" to "You have $quoteCount quotes created. Keep up the excellent work!"
-            }
-            quoteCount in 5..9 -> {
-                "You're on fire!" to "Wow! $quoteCount quotes completed. You're becoming a solar expert!"
-            }
-            quoteCount >= 10 -> {
-                "Amazing work!" to "You've reached $quoteCount quotes! You're a true solar professional!"
-            }
-            else -> {
-                "Great job!" to "You've created a new quote!"
-            }
+            quoteCount == 1 -> "Congratulations!" to "You've created your first quote! You're on your way to solar success!"
+            quoteCount in 2..4 -> "Great progress!" to "You have $quoteCount quotes created. Keep up the excellent work!"
+            quoteCount in 5..9 -> "You're on fire!" to "Wow! $quoteCount quotes completed. You're becoming a solar expert!"
+            quoteCount in 10..14 -> "Amazing work!" to "You've reached $quoteCount quotes! You're a true solar professional!"
+            quoteCount in 15..19 -> "Incredible!" to "$quoteCount quotes! Your expertise is really showing!"
+            quoteCount in 20..24 -> "Outstanding!" to "$quoteCount quotes completed! You're unstoppable!"
+            quoteCount in 25..29 -> "Phenomenal!" to "$quoteCount quotes! You're a solar powerhouse!"
+            quoteCount in 30..34 -> "Exceptional!" to "$quoteCount quotes! Your dedication is inspiring!"
+            quoteCount in 35..39 -> "Remarkable!" to "$quoteCount quotes! You're setting new standards!"
+            quoteCount in 40..44 -> "Extraordinary!" to "$quoteCount quotes! You're a true master!"
+            quoteCount in 45..49 -> "Legendary!" to "$quoteCount quotes! You're breaking all records!"
+            quoteCount >= 50 -> "ELITE STATUS!" to "$quoteCount quotes! You're in the top tier of solar professionals!"
+            else -> "Great job!" to "You've created a new quote!"
         }
     }
 
     private fun generateLeadMotivationalMessage(leadCount: Int): Pair<String, String>? {
         return when {
-            leadCount == 1 -> {
-                "First lead!" to "You've added your first lead! Your pipeline is growing!"
-            }
-            leadCount in 2..4 -> {
-                "Building momentum!" to "You have $leadCount leads in your pipeline. Keep prospecting!"
-            }
-            leadCount in 5..9 -> {
-                "Excellent work!" to "$leadCount leads and counting! Your pipeline is looking strong!"
-            }
-            leadCount >= 10 -> {
-                "Sales superstar!" to "You've reached $leadCount leads! Your pipeline is thriving!"
-            }
-            else -> {
-                "New lead!" to "You've added a new lead to your pipeline!"
-            }
+            leadCount == 1 -> "First lead!" to "You've added your first lead! Your pipeline is growing!"
+            leadCount in 2..4 -> "Building momentum!" to "You have $leadCount leads in your pipeline. Keep prospecting!"
+            leadCount in 5..9 -> "Excellent work!" to "$leadCount leads and counting! Your pipeline is looking strong!"
+            leadCount in 10..14 -> "Sales superstar!" to "You've reached $leadCount leads! Your pipeline is thriving!"
+            leadCount in 15..19 -> "Pipeline pro!" to "$leadCount leads! You're building an impressive network!"
+            leadCount in 20..24 -> "Lead generation master!" to "$leadCount leads! Your prospecting skills are exceptional!"
+            leadCount in 25..29 -> "Networking champion!" to "$leadCount leads! Your pipeline is booming!"
+            leadCount in 30..34 -> "Business builder!" to "$leadCount leads! You're creating real momentum!"
+            leadCount in 35..39 -> "Sales machine!" to "$leadCount leads! Your dedication is paying off!"
+            leadCount in 40..44 -> "Pipeline powerhouse!" to "$leadCount leads! You're unstoppable!"
+            leadCount in 45..49 -> "Lead generation legend!" to "$leadCount leads! You're at the top of your game!"
+            leadCount >= 50 -> "ELITE PROSPECTOR!" to "$leadCount leads! You're a true sales professional!"
+            else -> "New lead!" to "You've added a new lead to your pipeline!"
         }
     }
 
@@ -263,7 +259,15 @@ class MotivationalNotificationManager(private val context: Context) {
             count == 1 -> 1
             count in 2..4 -> 2
             count in 5..9 -> 5
-            count >= 10 -> 10
+            count in 10..14 -> 10
+            count in 15..19 -> 15
+            count in 20..24 -> 20
+            count in 25..29 -> 25
+            count in 30..34 -> 30
+            count in 35..39 -> 35
+            count in 40..44 -> 40
+            count in 45..49 -> 45
+            count >= 50 -> 50
             else -> 0
         }
         
@@ -275,7 +279,15 @@ class MotivationalNotificationManager(private val context: Context) {
             count == 1 -> 1
             count in 2..4 -> 2
             count in 5..9 -> 5
-            count >= 10 -> 10
+            count in 10..14 -> 10
+            count in 15..19 -> 15
+            count in 20..24 -> 20
+            count in 25..29 -> 25
+            count in 30..34 -> 30
+            count in 35..39 -> 35
+            count in 40..44 -> 40
+            count in 45..49 -> 45
+            count >= 50 -> 50
             else -> return
         }
         
