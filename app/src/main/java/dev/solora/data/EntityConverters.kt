@@ -5,13 +5,11 @@ import java.util.Date
 import java.util.UUID
 
 /**
- * Extension functions to convert between local and Firebase entities
+ * Converters for transforming between Room (local) and Firestore (cloud) entities
+ * Used for offline sync and data persistence
  */
 
-// ============================================
-// QUOTE CONVERTERS
-// ============================================
-
+// Convert local quote to Firebase format
 fun LocalQuote.toFirebaseQuote(): FirebaseQuote {
     return FirebaseQuote(
         id = this.id,
@@ -42,6 +40,7 @@ fun LocalQuote.toFirebaseQuote(): FirebaseQuote {
     )
 }
 
+// Convert Firebase quote to local format for offline storage
 fun FirebaseQuote.toLocalQuote(synced: Boolean = true): LocalQuote {
     return LocalQuote(
         id = this.id ?: UUID.randomUUID().toString(),
@@ -73,10 +72,7 @@ fun FirebaseQuote.toLocalQuote(synced: Boolean = true): LocalQuote {
     )
 }
 
-// ============================================
-// LEAD CONVERTERS
-// ============================================
-
+// Convert local lead to Firebase format
 fun LocalLead.toFirebaseLead(): FirebaseLead {
     return FirebaseLead(
         id = this.id,
@@ -93,6 +89,7 @@ fun LocalLead.toFirebaseLead(): FirebaseLead {
     )
 }
 
+// Convert Firebase lead to local format for offline storage
 fun FirebaseLead.toLocalLead(synced: Boolean = true): LocalLead {
     return LocalLead(
         id = this.id ?: UUID.randomUUID().toString(),

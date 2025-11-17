@@ -4,8 +4,8 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 /**
- * Local database entities for offline mode
- * These mirror the Firebase models but are stored locally in Room
+ * Room database entities for offline storage
+ * Mirror Firebase models with additional sync tracking
  */
 
 @Entity(tableName = "quotes")

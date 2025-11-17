@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /**
- * Application class that initializes Firebase services and offline mode
- * Enables offline persistence for both Firestore and Room database
+ * Application class for Solora
+ * Sets up Firebase, Room database, and automatic offline sync
  */
 class SoloraApp : Application() {
     
-    // Offline components - accessible throughout the app
+    // Global offline components accessible to ViewModels
     lateinit var localDatabase: LocalDatabase
         private set
     lateinit var offlineRepository: OfflineRepository
@@ -39,43 +39,36 @@ class SoloraApp : Application() {
         
         Log.d(TAG, "Initializing Solora App")
         
-        // Initialize Firebase
         FirebaseApp.initializeApp(this)
-        // Enable offline persistence so data is available without network
+        
+        // Enable Firestore offline persistence
         FirebaseFirestore.getInstance().firestoreSettings = FirebaseFirestoreSettings.Builder()
             .setPersistenceEnabled(true)
             .build()
         
-        // Initialize offline components
         initializeOfflineMode()
-        
-        // Start network monitoring and auto-sync
         startNetworkMonitoring()
     }
     
+    // Set up Room database and sync components
     private fun initializeOfflineMode() {
         Log.d(TAG, "Initializing offline mode components")
         
-        // Initialize Room database
         localDatabase = LocalDatabase.getDatabase(this)
         
-        // Initialize repositories
         val firebaseRepository = FirebaseRepository()
         offlineRepository = OfflineRepository(localDatabase)
-        
-        // Initialize sync manager
         syncManager = SyncManager(offlineRepository, firebaseRepository)
-        
-        // Initialize network monitor
         networkMonitor = NetworkMonitor(this)
         
         Log.d(TAG, "Offline mode initialized successfully")
     }
     
+    // Auto sync when network becomes available
     private fun startNetworkMonitoring() {
         applicationScope.launch {
             networkMonitor.isConnected
-                .distinctUntilChanged() // Only react to changes
+                .distinctUntilChanged()
                 .collect { isConnected ->
                     Log.d(TAG, "Network status changed: ${if (isConnected) "CONNECTED" else "DISCONNECTED"}")
                     

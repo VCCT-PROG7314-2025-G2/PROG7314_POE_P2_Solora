@@ -20,6 +20,10 @@ import kotlinx.coroutines.tasks.await
 
 private val Context.motivationalDataStore by preferencesDataStore(name = "motivational_notifications")
 
+/**
+ * Manages milestone-based push notifications
+ * Sends encouraging messages when users reach lead/quote milestones
+ */
 class MotivationalNotificationManager(private val context: Context) {
     
     private val firestore = FirebaseFirestore.getInstance()

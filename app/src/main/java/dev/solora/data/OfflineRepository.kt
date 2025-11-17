@@ -5,8 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 /**
- * Repository for managing offline data operations
- * Handles local database interactions and provides data to ViewModels
+ * Manages offline data storage with Room database
+ * Provides local persistence when network is unavailable
  */
 class OfflineRepository(
     private val localDb: LocalDatabase
@@ -16,9 +16,7 @@ class OfflineRepository(
 
     private fun getCurrentUserId(): String? = auth.currentUser?.uid
 
-    // ============================================
-    // QUOTES OPERATIONS
-    // ============================================
+    // Quote operations
 
     suspend fun saveQuoteOffline(quote: LocalQuote) = withContext(Dispatchers.IO) {
         dao.insertQuote(quote)
@@ -42,9 +40,7 @@ class OfflineRepository(
         dao.deleteQuote(id)
     }
 
-    // ============================================
-    // LEADS OPERATIONS
-    // ============================================
+    // Lead operations
 
     suspend fun saveLeadOffline(lead: LocalLead) = withContext(Dispatchers.IO) {
         dao.insertLead(lead)
@@ -72,9 +68,7 @@ class OfflineRepository(
         dao.deleteLead(id)
     }
 
-    // ============================================
-    // BULK OPERATIONS
-    // ============================================
+    // Bulk operations for sync
 
     suspend fun saveQuotesOffline(quotes: List<LocalQuote>) = withContext(Dispatchers.IO) {
         dao.insertQuotes(quotes)
@@ -84,9 +78,7 @@ class OfflineRepository(
         dao.insertLeads(leads)
     }
 
-    // ============================================
-    // CLEAR DATA (for logout)
-    // ============================================
+    // Clear user data on logout
 
     suspend fun clearAllData() = withContext(Dispatchers.IO) {
         val userId = getCurrentUserId() ?: return@withContext

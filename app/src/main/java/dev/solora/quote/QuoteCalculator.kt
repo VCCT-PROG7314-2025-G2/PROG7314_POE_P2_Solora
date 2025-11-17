@@ -90,8 +90,10 @@ data class SystemOptimization(
     val recommendations: List<String>
 ) : java.io.Serializable
 
-// This class handles all the solar system calculations
-// It figures out how many panels you need, how much it will cost, and how long it takes to pay back
+/**
+ * Solar system calculator with basic and advanced modes
+ * Calculates panel requirements, costs, payback period, and environmental impact
+ */
 object QuoteCalculator {
     
     private const val PANEL_DEGRADATION_RATE = 0.005 // 0.5% per year
@@ -143,8 +145,6 @@ object QuoteCalculator {
         val inverterKw = (systemKw * inverterRatio).coerceAtLeast(1.0)
         val performanceRatio = settings?.performanceRatio ?: 0.8
         val savings = usageKwh * inputs.tariffRPerKwh * performanceRatio
-        
-        // Logging removed for unit test compatibility
         
         // Calculate additional metrics
         val estimatedMonthlyGeneration = systemKw * inputs.sunHoursPerDay * 30

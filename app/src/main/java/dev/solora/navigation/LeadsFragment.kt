@@ -527,7 +527,7 @@ class LeadsAdapter(
         fun bind(lead: FirebaseLead) {
             tvReference.text = lead.id ?: "N/A"
             tvName.text = lead.name
-            tvEmail.text = if (lead.email.isNotEmpty()) lead.email else "No email"
+            tvEmail.text = if (lead.email.isNotEmpty()) lead.email else "Email:"
             
             // Display follow-up date if available
             if (lead.followUpDate != null) {

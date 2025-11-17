@@ -13,14 +13,17 @@ import android.content.SharedPreferences
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import kotlinx.coroutines.flow.distinctUntilChanged
 
-// This is the main activity that starts when the app opens
-// It checks if everything is working and then shows the main app
+/**
+ * Main entry point for the Solora app
+ * Handles app initialization, language setup, and network monitoring
+ */
 class MainActivity : FragmentActivity() {
     
     private val firebaseRepository = FirebaseRepository()
     private val apiService = FirebaseFunctionsApi()
     private var offlineDialogShown = false
 
+    // Apply saved language preference before creating any views
     override fun attachBaseContext(newBase: Context) {
         val sharedPrefs = newBase.getSharedPreferences("Settings", Context.MODE_PRIVATE)
         val lang = sharedPrefs.getString("My_Lang", "en") ?: "en"
@@ -32,14 +35,11 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         
-        // Monitor network connectivity and show offline mode dialog
         monitorNetworkStatus()
-        
-        // Check if our API is working when the app starts
-        // This makes sure everything is connected properly
         performStartupChecks()
     }
     
+    // Watch for network changes and notify user when offline
     private fun monitorNetworkStatus() {
         val app = application as SoloraApp
         lifecycleScope.launch {
@@ -50,13 +50,13 @@ class MainActivity : FragmentActivity() {
                         showOfflineModeDialog()
                         offlineDialogShown = true
                     } else if (isConnected && offlineDialogShown) {
-                        // Reset flag when back online
                         offlineDialogShown = false
                     }
                 }
         }
     }
     
+    // Inform user about offline capabilities
     private fun showOfflineModeDialog() {
         MaterialAlertDialogBuilder(this)
             .setTitle("Offline Mode")
@@ -79,10 +79,10 @@ class MainActivity : FragmentActivity() {
             .show()
     }
     
+    // Verify API connectivity and sync any pending offline data
     private fun performStartupChecks() {
         lifecycleScope.launch {
             try {
-                // Health check API endpoint
                 val healthResult = apiService.healthCheck()
                 if (healthResult.isSuccess) {
                     val healthData = healthResult.getOrNull()
@@ -91,7 +91,6 @@ class MainActivity : FragmentActivity() {
                     Log.w("MainActivity", "API Health Check failed: ${healthResult.exceptionOrNull()?.message}")
                 }
                 
-                // Test API connectivity with a simple settings call
                 val settingsResult = apiService.getSettings()
                 if (settingsResult.isSuccess) {
                     Log.d("MainActivity", "API connectivity verified - settings endpoint working")
@@ -99,7 +98,6 @@ class MainActivity : FragmentActivity() {
                     Log.w("MainActivity", "API connectivity issue: ${settingsResult.exceptionOrNull()?.message}")
                 }
                 
-                // Sync any offline data if needed
                 syncOfflineData()
                 
             } catch (e: Exception) {
@@ -108,6 +106,7 @@ class MainActivity : FragmentActivity() {
         }
     }
     
+    // Attempt to sync any data created while offline
     private suspend fun syncOfflineData() {
         try {
             // Check if there's any offline data that needs syncing

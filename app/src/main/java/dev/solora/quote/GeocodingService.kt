@@ -6,6 +6,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.*
 
+/**
+ * Converts between addresses and GPS coordinates
+ * Used to get location data for NASA solar API calls
+ */
 class GeocodingService(private val context: Context) {
     
     data class LocationResult(
@@ -16,6 +20,7 @@ class GeocodingService(private val context: Context) {
         val error: String? = null
     )
     
+    // Convert street address to latitude/longitude
     suspend fun getCoordinatesFromAddress(address: String): LocationResult = withContext(Dispatchers.IO) {
         try {
             val geocoder = Geocoder(context, Locale.getDefault())
@@ -61,6 +66,7 @@ class GeocodingService(private val context: Context) {
         }
     }
     
+    // Convert latitude/longitude to street address
     suspend fun getAddressFromCoordinates(latitude: Double, longitude: Double): LocationResult = withContext(Dispatchers.IO) {
         try {
             val geocoder = Geocoder(context, Locale.getDefault())

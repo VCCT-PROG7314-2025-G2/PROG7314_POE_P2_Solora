@@ -4,10 +4,12 @@ import com.google.firebase.Timestamp
 import com.google.firebase.firestore.DocumentId
 import com.google.firebase.firestore.ServerTimestamp
 
-// These are the data models that store information in Firebase
-// They define what data we save for quotes, leads, and users
+/**
+ * Firestore data models for the Solora app
+ * These define the structure of documents stored in Firebase
+ */
 
-// This stores all the information about a solar quote
+// Solar quote with calculation results and NASA data
 data class FirebaseQuote(
     @DocumentId
     val id: String? = null,
@@ -45,7 +47,7 @@ data class FirebaseQuote(
     val updatedAt: Timestamp? = null
 )
 
-// This stores information about potential customers (leads)
+// Lead with status tracking
 data class FirebaseLead(
     @DocumentId
     val id: String? = null,
@@ -56,14 +58,14 @@ data class FirebaseLead(
     val notes: String? = null,
     val quoteId: String? = null, // Link to quote if applicable
     val userId: String = "", // Link to Firebase Auth user
-    val followUpDate: Timestamp? = null, // Optional follow-up date
+    val followUpDate: Timestamp? = null, // Optional follow up date
     @ServerTimestamp
     val createdAt: Timestamp? = null,
     @ServerTimestamp
     val updatedAt: Timestamp? = null
 )
 
-// This stores information about the app users (consultants)
+// App user profile
 data class FirebaseUser(
     @DocumentId
     val id: String? = null,
@@ -79,6 +81,7 @@ data class FirebaseUser(
     val updatedAt: Timestamp? = null
 )
 
+// App configuration and settings
 data class FirebaseConfiguration(
     @DocumentId
     val id: String? = null,
