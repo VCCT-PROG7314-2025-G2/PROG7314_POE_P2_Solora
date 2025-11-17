@@ -59,18 +59,18 @@ class MainActivity : FragmentActivity() {
     
     private fun showOfflineModeDialog() {
         MaterialAlertDialogBuilder(this)
-            .setTitle("📴 Offline Mode")
+            .setTitle("Offline Mode")
             .setMessage(
                 "You're currently offline, but you can still:\n\n" +
-                "✅ View all quotes and leads\n" +
-                "✅ Create new quotes\n" +
-                "✅ Create and update leads\n" +
-                "✅ Link quotes to leads\n\n" +
-                "⚠️ Limited features:\n" +
-                "❌ NASA solar data (uses default values)\n" +
-                "❌ Address geocoding\n" +
-                "❌ Real-time sync\n\n" +
-                "💾 All your work will automatically sync to the cloud when you're back online!"
+                "• View all quotes and leads\n" +
+                "• Create new quotes\n" +
+                "• Create and update leads\n" +
+                "• Link quotes to leads\n\n" +
+                "Limited features:\n" +
+                "• NASA solar data (uses default values)\n" +
+                "• Address geocoding\n" +
+                "• Real-time sync\n\n" +
+                "All your work will automatically sync to the cloud when you're back online!"
             )
             .setPositiveButton("Got it") { dialog, _ ->
                 dialog.dismiss()
