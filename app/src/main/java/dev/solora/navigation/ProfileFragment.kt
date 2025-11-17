@@ -129,6 +129,12 @@ class ProfileFragment : Fragment() {
             handleNotificationToggle(isChecked)
         }
         
+        // Reset Notification Milestones (for testing)
+        view.findViewById<View>(R.id.btn_notifications)?.setOnLongClickListener {
+            showResetNotificationsDialog()
+            true
+        }
+        
         // Logout
         view.findViewById<View>(R.id.btn_logout)?.setOnClickListener {
             logout()
@@ -342,9 +348,47 @@ class ProfileFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             notificationManager.enableMotivationalNotifications(true)
             Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
-            
+
             // Send a test notification to confirm it's working
             notificationManager.sendTestNotification()
+        }
+    }
+    
+    private fun showResetNotificationsDialog() {
+        MaterialAlertDialogBuilder(requireContext())
+            .setTitle("Reset Notification Milestones")
+            .setMessage("This will reset all notification milestones so you can receive notifications again for all levels. This is useful for testing.\n\nAre you sure?")
+            .setPositiveButton("Reset") { _, _ ->
+                resetNotificationMilestones()
+            }
+            .setNegativeButton("Cancel", null)
+            .show()
+    }
+    
+    private fun resetNotificationMilestones() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            try {
+                // Reset milestones in Firebase
+                val userId = auth.currentUser?.uid
+                if (userId != null) {
+                    com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                        .collection("user_settings")
+                        .document(userId)
+                        .update(
+                            mapOf(
+                                "notifiedLeadMilestones" to com.google.firebase.firestore.FieldValue.delete(),
+                                "notifiedQuoteMilestones" to com.google.firebase.firestore.FieldValue.delete()
+                            )
+                        )
+                        .await()
+                    
+                    Toast.makeText(requireContext(), "Notification milestones reset! You'll receive notifications again.", Toast.LENGTH_LONG).show()
+                } else {
+                    Toast.makeText(requireContext(), "Error: Not logged in", Toast.LENGTH_SHORT).show()
+                }
+            } catch (e: Exception) {
+                Toast.makeText(requireContext(), "Error resetting milestones: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
     

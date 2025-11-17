@@ -96,7 +96,6 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                     Log.d(TAG, "Lead saved to Firebase successfully")
                     // Also save to local database (marked as synced)
                     offlineRepository.saveLeadOffline(lead.toLocalLead(synced = true))
-                    notificationManager.checkAndSendLeadMessage()
                 } else {
                     Log.e(TAG, "Failed to save lead to Firebase: ${result.exceptionOrNull()?.message}")
                     // Save locally as unsynced
@@ -107,6 +106,9 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                 Log.d(TAG, "Offline - saving lead to local database")
                 offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
             }
+            
+            // Send notification regardless of online/offline status
+            notificationManager.checkAndSendLeadMessage()
         }
     }
     
@@ -367,20 +369,20 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                     Log.d(TAG, "Lead created in Firebase successfully")
                     // Also save to local database (marked as synced)
                     offlineRepository.saveLeadOffline(lead.toLocalLead(synced = true))
-                    notificationManager.checkAndSendLeadMessage()
-                    true
                 } else {
                     Log.e(TAG, "Failed to create lead in Firebase: ${result.exceptionOrNull()?.message}")
                     // Save locally as unsynced
                     offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
-                    true // Still return true since it's saved locally
                 }
             } else {
                 // Offline - save to local database only (unsynced)
                 Log.d(TAG, "Offline - creating lead in local database")
                 offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
-                true
             }
+            
+            // Send notification regardless of online/offline status
+            notificationManager.checkAndSendLeadMessage()
+            true
         } catch (e: Exception) {
             Log.e(TAG, "Error creating lead from quote: ${e.message}", e)
             false
