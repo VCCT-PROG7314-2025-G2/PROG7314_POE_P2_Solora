@@ -10,6 +10,8 @@ import kotlinx.coroutines.launch
 import android.util.Log
 import dev.solora.profile.LocaleHelper
 import android.content.SharedPreferences
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 // This is the main activity that starts when the app opens
 // It checks if everything is working and then shows the main app
@@ -17,6 +19,7 @@ class MainActivity : FragmentActivity() {
     
     private val firebaseRepository = FirebaseRepository()
     private val apiService = FirebaseFunctionsApi()
+    private var offlineDialogShown = false
 
     override fun attachBaseContext(newBase: Context) {
         val sharedPrefs = newBase.getSharedPreferences("Settings", Context.MODE_PRIVATE)
@@ -29,9 +32,51 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         
+        // Monitor network connectivity and show offline mode dialog
+        monitorNetworkStatus()
+        
         // Check if our API is working when the app starts
         // This makes sure everything is connected properly
         performStartupChecks()
+    }
+    
+    private fun monitorNetworkStatus() {
+        val app = application as SoloraApp
+        lifecycleScope.launch {
+            app.networkMonitor.isConnected
+                .distinctUntilChanged()
+                .collect { isConnected ->
+                    if (!isConnected && !offlineDialogShown) {
+                        showOfflineModeDialog()
+                        offlineDialogShown = true
+                    } else if (isConnected && offlineDialogShown) {
+                        // Reset flag when back online
+                        offlineDialogShown = false
+                    }
+                }
+        }
+    }
+    
+    private fun showOfflineModeDialog() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle("📴 Offline Mode")
+            .setMessage(
+                "You're currently offline, but you can still:\n\n" +
+                "✅ View all quotes and leads\n" +
+                "✅ Create new quotes\n" +
+                "✅ Create and update leads\n" +
+                "✅ Link quotes to leads\n\n" +
+                "⚠️ Limited features:\n" +
+                "❌ NASA solar data (uses default values)\n" +
+                "❌ Address geocoding\n" +
+                "❌ Real-time sync\n\n" +
+                "💾 All your work will automatically sync to the cloud when you're back online!"
+            )
+            .setPositiveButton("Got it") { dialog, _ ->
+                dialog.dismiss()
+            }
+            .setCancelable(true)
+            .show()
     }
     
     private fun performStartupChecks() {
