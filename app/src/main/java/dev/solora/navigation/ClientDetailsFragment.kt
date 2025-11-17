@@ -182,6 +182,10 @@ class ClientDetailsFragment : Fragment() {
         val clientName = "$firstName $lastName"
         
         calculationOutputs?.let { outputs ->
+            // Disable button to prevent multiple clicks
+            btnSaveQuote.isEnabled = false
+            btnSaveQuote.text = "Saving..."
+            
             // Save the quote first and wait for completion
             viewLifecycleOwner.lifecycleScope.launch {
                 try {
@@ -277,6 +281,10 @@ class ClientDetailsFragment : Fragment() {
                         R.id.action_client_details_to_quotes,
                         Bundle().apply { putInt("show_tab", 1) }
                     )
+                } finally {
+                    // Re-enable button after operation completes
+                    btnSaveQuote.isEnabled = true
+                    updateButtonText()
                 }
             }
         } ?: run {

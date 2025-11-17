@@ -285,6 +285,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
     /**
      * Save quote to database from calculation results
      * Includes NASA data, location info, and company settings snapshot
+     * Supports offline mode - saves locally when offline
      */
     fun saveQuoteFromCalculation(
         reference: String,
@@ -297,6 +298,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         
         viewModelScope.launch {
             try {
+                val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                val quoteId = UUID.randomUUID().toString()
+                
                 // Get company settings snapshot
                 val companySettings = settingsRepository.settings.stateIn(
                     viewModelScope,
@@ -304,18 +308,11 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     dev.solora.settings.AppSettings()
                 ).value.companySettings
                 
-                // Saving quote with panelWatt=${calculation.panelWatt}W (from calculation)
-                
-                // Debug NASA data before saving
-                val nasaData = calculation.detailedAnalysis?.locationData
-                // NASA data for saving: irradiance=${nasaData?.averageAnnualIrradiance}, sunHours=${nasaData?.averageAnnualSunHours}
-                // detailedAnalysis is null: ${calculation.detailedAnalysis == null}
-                // locationData is null: ${nasaData == null}
-                
                 val quote = FirebaseQuote(
-            reference = reference,
-            clientName = clientName,
-            address = address,
+                    id = quoteId,
+                    reference = reference,
+                    clientName = clientName,
+                    address = address,
                     // Input data
                     usageKwh = calculation.monthlyUsageKwh,
                     billRands = calculation.monthlyBillRands,
@@ -340,19 +337,37 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                     consultantPhone = companySettings.consultantPhone,
                     consultantEmail = companySettings.consultantEmail,
                     // Metadata
-                    userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                    userId = userId
                 )
 
-                val result = firebaseRepository.saveQuote(quote)
-                if (result.isSuccess) {
-                    val savedQuote = quote.copy(id = result.getOrNull())
-                    _lastQuote.value = savedQuote
-                    viewModelScope.launch {
+                // Check if online
+                val isOnline = networkMonitor.isCurrentlyConnected()
+                Log.d(TAG, "Saving quote from calculation, online status: $isOnline")
+                
+                if (isOnline) {
+                    // Try to save to Firebase first
+                    val result = firebaseRepository.saveQuote(quote)
+                    if (result.isSuccess) {
+                        Log.d(TAG, "Quote saved to Firebase successfully")
+                        val savedQuote = quote.copy(id = result.getOrNull())
+                        _lastQuote.value = savedQuote
+                        // Also save to local database (marked as synced)
+                        offlineRepository.saveQuoteOffline(savedQuote.toLocalQuote(synced = true))
                         notificationManager.checkAndSendMotivationalMessage()
+                    } else {
+                        Log.e(TAG, "Failed to save quote to Firebase: ${result.exceptionOrNull()?.message}")
+                        // Save locally as unsynced
+                        offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = false))
+                        _lastQuote.value = quote
                     }
+                } else {
+                    // Offline - save to local database only (unsynced)
+                    Log.d(TAG, "Offline - saving quote to local database")
+                    offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = false))
+                    _lastQuote.value = quote
                 }
             } catch (e: Exception) {
-                // ("QuotesViewModel", "Exception saving quote: ${e.message}", e)
+                Log.e(TAG, "Error saving quote: ${e.message}", e)
             }
         }
     }
@@ -403,7 +418,10 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         _lastCalculation.value = null
     }
     
-    // Synchronous version for immediate feedback
+    /**
+     * Synchronous version for immediate feedback
+     * Supports offline mode - saves locally when offline
+     */
     suspend fun saveQuoteFromCalculationSync(
         reference: String,
         clientName: String,
@@ -411,6 +429,9 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
         calculation: QuoteOutputs
     ): Result<FirebaseQuote> {
         return try {
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val quoteId = UUID.randomUUID().toString()
+            
             // Get company settings snapshot
             val companySettings = settingsRepository.settings.stateIn(
                 viewModelScope,
@@ -419,6 +440,7 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
             ).value.companySettings
             
             val quote = FirebaseQuote(
+                id = quoteId,
                 reference = reference,
                 clientName = clientName,
                 address = address,
@@ -446,21 +468,44 @@ class QuotesViewModel(app: Application) : AndroidViewModel(app) {
                 consultantPhone = companySettings.consultantPhone,
                 consultantEmail = companySettings.consultantEmail,
                 // Metadata
-                userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+                userId = userId
             )
 
-            val result = firebaseRepository.saveQuote(quote)
-            if (result.isSuccess) {
-                val savedQuote = quote.copy(id = result.getOrNull())
-                _lastQuote.value = savedQuote
-                viewModelScope.launch {
-                    notificationManager.checkAndSendMotivationalMessage()
+            // Check if online
+            val isOnline = networkMonitor.isCurrentlyConnected()
+            Log.d(TAG, "Saving quote from calculation (sync), online status: $isOnline")
+            
+            if (isOnline) {
+                // Try to save to Firebase first
+                val result = firebaseRepository.saveQuote(quote)
+                if (result.isSuccess) {
+                    Log.d(TAG, "Quote saved to Firebase successfully")
+                    val savedQuote = quote.copy(id = result.getOrNull())
+                    _lastQuote.value = savedQuote
+                    // Also save to local database (marked as synced)
+                    offlineRepository.saveQuoteOffline(savedQuote.toLocalQuote(synced = true))
+                    viewModelScope.launch {
+                        notificationManager.checkAndSendMotivationalMessage()
+                    }
+                    Result.success(savedQuote)
+                } else {
+                    Log.e(TAG, "Failed to save quote to Firebase: ${result.exceptionOrNull()?.message}")
+                    // Save locally as unsynced
+                    offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = false))
+                    _lastQuote.value = quote
+                    // Return success with the quote (it's saved locally)
+                    Result.success(quote)
                 }
-                Result.success(savedQuote)
             } else {
-                Result.failure(result.exceptionOrNull() ?: Exception("Failed to save quote"))
+                // Offline - save to local database only (unsynced)
+                Log.d(TAG, "Offline - saving quote to local database")
+                offlineRepository.saveQuoteOffline(quote.toLocalQuote(synced = false))
+                _lastQuote.value = quote
+                // Return success with the quote (it's saved locally)
+                Result.success(quote)
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Error saving quote: ${e.message}", e)
             Result.failure(e)
         }
     }

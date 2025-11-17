@@ -247,56 +247,87 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
         }
     }
     
-    // Synchronous version for immediate feedback
+    /**
+     * Synchronous version for immediate feedback
+     * Supports offline mode - updates locally when offline
+     */
     suspend fun linkQuoteToLeadSync(leadId: String, quoteId: String): Boolean {
         return try {
-            // Starting linkQuoteToLeadSync - LeadId: $leadId, QuoteId: $quoteId
+            Log.d(TAG, "Starting linkQuoteToLeadSync - LeadId: $leadId, QuoteId: $quoteId")
             
             // Validate inputs
             if (leadId.isBlank() || quoteId.isBlank()) {
-                // Invalid IDs - LeadId: '$leadId', QuoteId: '$quoteId'
+                Log.w(TAG, "Invalid IDs - LeadId: '$leadId', QuoteId: '$quoteId'")
                 return false
             }
             
-            // Get the current lead
-            // Getting lead by ID: $leadId
-            val result = firebaseRepository.getLeadById(leadId)
+            // Check if online
+            val isOnline = networkMonitor.isCurrentlyConnected()
+            Log.d(TAG, "Linking quote to lead, online status: $isOnline")
             
-            if (result.isSuccess) {
-                val currentLead = result.getOrNull()
-                // Lead retrieved: ${currentLead?.id}, Name: ${currentLead?.name}
+            if (isOnline) {
+                // Try Firebase first
+                val result = firebaseRepository.getLeadById(leadId)
                 
-                if (currentLead != null) {
-                    // Update the lead with the quote ID
-                    val updatedLead = currentLead.copy(quoteId = quoteId)
-                    // Updating lead with quote ID: $quoteId
+                if (result.isSuccess) {
+                    val currentLead = result.getOrNull()
+                    Log.d(TAG, "Lead retrieved: ${currentLead?.id}, Name: ${currentLead?.name}")
                     
-                    val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
-                    
-                    if (updateResult.isSuccess) {
-                        // Successfully linked quote $quoteId to lead $leadId
-                        return true
+                    if (currentLead != null) {
+                        // Update the lead with the quote ID
+                        val updatedLead = currentLead.copy(quoteId = quoteId)
+                        
+                        val updateResult = firebaseRepository.updateLead(leadId, updatedLead)
+                        
+                        if (updateResult.isSuccess) {
+                            Log.d(TAG, "Successfully linked quote $quoteId to lead $leadId in Firebase")
+                            // Also update in local database
+                            offlineRepository.saveLeadOffline(updatedLead.toLocalLead(synced = true))
+                            return true
+                        } else {
+                            Log.e(TAG, "Failed to update lead in Firebase: ${updateResult.exceptionOrNull()?.message}")
+                            // Save locally as unsynced
+                            offlineRepository.saveLeadOffline(updatedLead.toLocalLead(synced = false))
+                            return true // Still return true since it's saved locally
+                        }
                     } else {
-                        val error = updateResult.exceptionOrNull()
-                        // ("LeadsViewModel", "Failed to update lead in Firebase: ${error?.message}", error)
+                        Log.w(TAG, "Lead not found in database: $leadId")
                         return false
                     }
                 } else {
-                    // Lead not found in database: $leadId
+                    Log.e(TAG, "Error getting lead from Firebase: ${result.exceptionOrNull()?.message}")
                     return false
                 }
             } else {
-                val error = result.exceptionOrNull()
-                // ("LeadsViewModel", "Error getting lead from Firebase: ${error?.message}", error)
-                return false
+                // Offline - update local database only
+                Log.d(TAG, "Offline - updating lead in local database")
+                val localLeads = offlineRepository.getLocalLeads()
+                val localLead = localLeads.find { it.id == leadId }
+                
+                if (localLead != null) {
+                    val updatedLead = localLead.copy(
+                        quoteId = quoteId,
+                        synced = false,
+                        updatedAt = System.currentTimeMillis()
+                    )
+                    offlineRepository.updateLeadOffline(updatedLead)
+                    Log.d(TAG, "Successfully linked quote $quoteId to lead $leadId in local database")
+                    return true
+                } else {
+                    Log.w(TAG, "Lead not found in local database: $leadId")
+                    return false
+                }
             }
         } catch (e: Exception) {
-            // ("LeadsViewModel", "Unexpected error linking quote to lead: ${e.message}", e)
+            Log.e(TAG, "Unexpected error linking quote to lead: ${e.message}", e)
             return false
         }
     }
     
-    // Synchronous version for immediate feedback
+    /**
+     * Synchronous version for immediate feedback
+     * Supports offline mode - creates lead locally when offline
+     */
     suspend fun createLeadFromQuoteSync(
         quoteId: String,
         clientName: String,
@@ -311,29 +342,47 @@ class LeadsViewModel(app: Application) : AndroidViewModel(app) {
                 return false
             }
             
+            val userId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+            val leadId = UUID.randomUUID().toString()
+            
             val lead = FirebaseLead(
+                id = leadId,
                 name = clientName,
                 email = email,
                 phone = phone,
                 status = status,
                 notes = notes.ifEmpty { "Lead created from quote. Address: $address" },
-                quoteId = quoteId
+                quoteId = quoteId,
+                userId = userId
             )
             
-            val result = firebaseRepository.saveLead(lead)
-            if (result.isSuccess) {
-                val leadId = result.getOrNull()
-                if (!leadId.isNullOrBlank()) {
+            // Check if online
+            val isOnline = networkMonitor.isCurrentlyConnected()
+            Log.d(TAG, "Creating lead from quote, online status: $isOnline")
+            
+            if (isOnline) {
+                // Try to save to Firebase first
+                val result = firebaseRepository.saveLead(lead)
+                if (result.isSuccess) {
+                    Log.d(TAG, "Lead created in Firebase successfully")
+                    // Also save to local database (marked as synced)
+                    offlineRepository.saveLeadOffline(lead.toLocalLead(synced = true))
                     notificationManager.checkAndSendLeadMessage()
                     true
                 } else {
-                    false
+                    Log.e(TAG, "Failed to create lead in Firebase: ${result.exceptionOrNull()?.message}")
+                    // Save locally as unsynced
+                    offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
+                    true // Still return true since it's saved locally
                 }
             } else {
-                val error = result.exceptionOrNull()
-                false
+                // Offline - save to local database only (unsynced)
+                Log.d(TAG, "Offline - creating lead in local database")
+                offlineRepository.saveLeadOffline(lead.toLocalLead(synced = false))
+                true
             }
         } catch (e: Exception) {
+            Log.e(TAG, "Error creating lead from quote: ${e.message}", e)
             false
         }
     }
