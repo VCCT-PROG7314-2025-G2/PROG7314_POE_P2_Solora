@@ -70,9 +70,15 @@ class MotivationalNotificationManager(private val context: Context) {
     }
 
     suspend fun checkAndSendMotivationalMessage() {
-        if (!isNotificationsEnabled()) return
+        android.util.Log.d("NotificationDebug", "=== checkAndSendMotivationalMessage called ===")
         
-        val userId = auth.currentUser?.uid ?: return
+        val notificationsEnabled = isNotificationsEnabled()
+        android.util.Log.d("NotificationDebug", "Notifications enabled: $notificationsEnabled")
+        if (!notificationsEnabled) return
+        
+        val userId = auth.currentUser?.uid
+        android.util.Log.d("NotificationDebug", "User ID: $userId")
+        if (userId == null) return
         
         try {
             val quotesSnapshot = firestore.collection("quotes")
@@ -81,17 +87,30 @@ class MotivationalNotificationManager(private val context: Context) {
                 .await()
             
             val quoteCount = quotesSnapshot.size()
+            android.util.Log.d("NotificationDebug", "Total quote count: $quoteCount")
             
-            if (shouldSendNotificationForCount(quoteCount, "quotes")) {
+            val shouldSend = shouldSendNotificationForCount(quoteCount, "quotes")
+            android.util.Log.d("NotificationDebug", "Should send notification: $shouldSend")
+            
+            if (shouldSend) {
                 val message = generateMotivationalMessage(quoteCount)
+                android.util.Log.d("NotificationDebug", "Generated message: ${message?.first}")
                 
                 if (message != null) {
                     showLocalNotification(message.first, message.second)
                     markMilestoneAsNotified(quoteCount, "quotes")
+                    android.util.Log.d("NotificationDebug", "Notification shown and milestone marked")
                 }
+            } else {
+                // Log which milestones have already been notified
+                val key = "notifiedQuoteMilestones"
+                val notifiedMilestones = getFromUserSettings(key) as? List<*>
+                val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() }
+                android.util.Log.d("NotificationDebug", "Already notified milestones: $milestonesList")
             }
             
         } catch (e: Exception) {
+            android.util.Log.e("NotificationDebug", "Error in checkAndSendMotivationalMessage: ${e.message}", e)
             if (shouldSendFallbackNotification()) {
                 showLocalNotification("Great job!", "You've created a new quote!")
                 markFallbackNotificationSent()
@@ -100,9 +119,15 @@ class MotivationalNotificationManager(private val context: Context) {
     }
 
     suspend fun checkAndSendLeadMessage() {
-        if (!isNotificationsEnabled()) return
+        android.util.Log.d("NotificationDebug", "=== checkAndSendLeadMessage called ===")
         
-        val userId = auth.currentUser?.uid ?: return
+        val notificationsEnabled = isNotificationsEnabled()
+        android.util.Log.d("NotificationDebug", "Notifications enabled: $notificationsEnabled")
+        if (!notificationsEnabled) return
+        
+        val userId = auth.currentUser?.uid
+        android.util.Log.d("NotificationDebug", "User ID: $userId")
+        if (userId == null) return
         
         try {
             val leadsSnapshot = firestore.collection("leads")
@@ -111,18 +136,30 @@ class MotivationalNotificationManager(private val context: Context) {
                 .await()
             
             val leadCount = leadsSnapshot.size()
+            android.util.Log.d("NotificationDebug", "Total lead count: $leadCount")
             
-            if (shouldSendNotificationForCount(leadCount, "leads")) {
+            val shouldSend = shouldSendNotificationForCount(leadCount, "leads")
+            android.util.Log.d("NotificationDebug", "Should send notification: $shouldSend")
+            
+            if (shouldSend) {
                 val message = generateLeadMotivationalMessage(leadCount)
+                android.util.Log.d("NotificationDebug", "Generated message: ${message?.first}")
                 
                 if (message != null) {
                     showLocalNotification(message.first, message.second)
                     markMilestoneAsNotified(leadCount, "leads")
+                    android.util.Log.d("NotificationDebug", "Notification shown and milestone marked")
                 }
+            } else {
+                // Log which milestones have already been notified
+                val key = "notifiedLeadMilestones"
+                val notifiedMilestones = getFromUserSettings(key) as? List<*>
+                val milestonesList = notifiedMilestones?.filterIsInstance<Long>()?.map { it.toInt() }
+                android.util.Log.d("NotificationDebug", "Already notified milestones: $milestonesList")
             }
             
         } catch (e: Exception) {
-            // Handle error silently
+            android.util.Log.e("NotificationDebug", "Error in checkAndSendLeadMessage: ${e.message}", e)
         }
     }
 
