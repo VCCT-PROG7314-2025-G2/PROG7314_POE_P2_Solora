@@ -202,15 +202,15 @@ class LoginFragment : Fragment() {
         
         androidx.appcompat.app.AlertDialog.Builder(requireContext())
             .setTitle(getString(R.string.enable_biometric_login))
-            .setMessage("Would you like to enable fingerprint login for faster access next time?")
-            .setPositiveButton("Enable") { _, _ ->
+            .setMessage(getString(R.string.enable_biometric_message))
+            .setPositiveButton(getString(R.string.enable)) { _, _ ->
                 activity?.let { fragmentActivity ->
                     if (isAdded && !isDetached) {
                         authViewModel.authenticateWithBiometrics(fragmentActivity as FragmentActivity)
                     }
                 }
             }
-            .setNegativeButton("Not now") { _, _ ->
+            .setNegativeButton(getString(R.string.not_now)) { _, _ ->
                 if (isAdded && !isDetached) {
                     findNavController().navigate(R.id.action_login_to_main)
                 }

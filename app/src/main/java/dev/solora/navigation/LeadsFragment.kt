@@ -1,6 +1,7 @@
 package dev.solora.navigation
 
 import android.os.Bundle
+import android.provider.Settings.Global.getString
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -157,16 +158,24 @@ class LeadsFragment : Fragment() {
     }
     
     private fun setupStatusDropdown() {
-        val statusOptions = arrayOf("New", "Contacted", "Qualified", "Negotiating", "Closed - Won", "Closed - Lost")
+        val statusOptions = arrayOf(
+            getString(R.string.status_new),
+            getString(R.string.status_contacted),
+            getString(R.string.status_qualified),
+            getString(R.string.status_negotiating),
+            getString(R.string.status_closed_won),
+            getString(R.string.status_closed_lost)
+        )
+
         val adapter = ArrayAdapter(requireContext(), android.R.layout.simple_dropdown_item_1line, statusOptions)
         spinnerStatus.setAdapter(adapter)
-        spinnerStatus.setText("New", false) // Set default value
+        spinnerStatus.setText(statusOptions[0], false) // Set default value
     }
     
     private fun setupFollowUpDatePicker() {
         etFollowUpDate.setOnClickListener {
             val datePicker = MaterialDatePicker.Builder.datePicker()
-                .setTitleText("Select Follow-up Date")
+                .setTitleText(getString(R.string.select_follow_up_date))
                 .setSelection(selectedFollowUpDateMillis ?: MaterialDatePicker.todayInUtcMilliseconds())
                 .setTheme(R.style.ThemeOverlay_Solora_DatePicker)
                 .build()
@@ -213,8 +222,8 @@ class LeadsFragment : Fragment() {
         
         // Populate data
         tvLeadName.text = lead.name
-        tvLeadEmail.text = if (lead.email.isNotEmpty()) lead.email else "Not provided"
-        tvLeadPhone.text = if (lead.phone.isNotEmpty()) lead.phone else "Not provided"
+        tvLeadEmail.text = if (lead.email.isNotEmpty()) lead.email else getString(R.string.not_provided)
+        tvLeadPhone.text = if (lead.phone.isNotEmpty()) lead.phone else getString(R.string.not_provided)
         tvLeadId.text = lead.id ?: "N/A"
         tvLeadDate.text = dateText
         tvLeadStatus.text = lead.status.uppercase()
@@ -265,14 +274,14 @@ class LeadsFragment : Fragment() {
         
         // Status options with descriptions
         val statusOptions = listOf(
-            Triple("New", "new", "Lead has just been created"),
-            Triple("Contacted", "contacted", "Initial contact has been made"),
-            Triple("Qualified", "qualified", "Lead meets our criteria"),
-            Triple("Negotiating", "negotiating", "Discussing terms and pricing"),
-            Triple("Closed - Won", "closed_won", "Successfully converted to customer"),
-            Triple("Closed - Lost", "closed_lost", "Lead did not convert")
+            Triple(getString(R.string.status_new), "new", getString(R.string.status_new_desc)),
+            Triple(getString(R.string.status_contacted), "contacted", getString(R.string.status_contacted_desc)),
+            Triple(getString(R.string.status_qualified), "qualified", getString(R.string.status_qualified_desc)),
+            Triple(getString(R.string.status_negotiating), "negotiating", getString(R.string.status_negotiating_desc)),
+            Triple(getString(R.string.status_closed_won), "closed_won", getString(R.string.status_closed_won_desc)),
+            Triple(getString(R.string.status_closed_lost), "closed_lost", getString(R.string.status_closed_lost_desc))
         )
-        
+
         var selectedStatus = lead.status
         
         // Add radio buttons for each status
@@ -430,7 +439,7 @@ class LeadsFragment : Fragment() {
         etContact.text.clear()
         etFollowUpDate.text.clear()
         selectedFollowUpDateMillis = null
-        spinnerStatus.setText("New", false)
+        spinnerStatus.setText(getString(R.string.status_new), false)
     }
     
     private fun addFirebaseLead() {
@@ -463,15 +472,15 @@ class LeadsFragment : Fragment() {
         
         // Convert display status to database status
         val status = when (selectedStatus) {
-            "New" -> "new"
-            "Contacted" -> "contacted"
-            "Qualified" -> "qualified"
-            "Negotiating" -> "negotiating"
-            "Closed - Won" -> "closed_won"
-            "Closed - Lost" -> "closed_lost"
+            getString(R.string.status_new) -> "new"
+            getString(R.string.status_contacted) -> "contacted"
+            getString(R.string.status_qualified) -> "qualified"
+            getString(R.string.status_negotiating) -> "negotiating"
+            getString(R.string.status_closed_won) -> "closed_won"
+            getString(R.string.status_closed_lost) -> "closed_lost"
             else -> "new"
         }
-        
+
         // Convert follow-up date to Timestamp if selected
         val followUpTimestamp = selectedFollowUpDateMillis?.let {
             com.google.firebase.Timestamp(Date(it))

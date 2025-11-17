@@ -245,7 +245,7 @@ class SettingsFragment : Fragment() {
             
             // Show loading state
             btnSaveSettings.isEnabled = false
-            btnSaveSettings.text = "Saving..."
+            btnSaveSettings.text = getString(R.string.saving)
             
             // Get calculation settings
             val calculationSettings = CalculationSettings(
@@ -287,19 +287,19 @@ class SettingsFragment : Fragment() {
                 
                 // Reset button state after successful save
                 btnSaveSettings.isEnabled = true
-                btnSaveSettings.text = "Save Settings"
+                btnSaveSettings.text = getString(R.string.save_settings)
                 Toast.makeText(requireContext(), "Settings saved successfully!", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 // Reset button state on error
                 btnSaveSettings.isEnabled = true
-                btnSaveSettings.text = "Save Settings"
+                btnSaveSettings.text = getString(R.string.save_settings)
                 Toast.makeText(requireContext(), "Error saving settings: ${e.message}", Toast.LENGTH_LONG).show()
             }
             
         } catch (e: Exception) {
             // Reset button state on error
             btnSaveSettings.isEnabled = true
-            btnSaveSettings.text = "Save Settings"
+            btnSaveSettings.text = getString(R.string.save_settings)
             Toast.makeText(requireContext(), "Error saving settings: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
@@ -309,7 +309,7 @@ class SettingsFragment : Fragment() {
             
             // Show loading state
             btnResetSettings.isEnabled = false
-            btnResetSettings.text = "Resetting..."
+            btnResetSettings.text = getString(R.string.resetting)
             
             // Reset settings in Firebase
             try {
@@ -317,19 +317,19 @@ class SettingsFragment : Fragment() {
                 
                 // Reset button state after successful reset
                 btnResetSettings.isEnabled = true
-                btnResetSettings.text = "Reset to Defaults"
+                btnResetSettings.text = getString(R.string.reset_to_defaults)
                 Toast.makeText(requireContext(), "Settings reset to defaults", Toast.LENGTH_SHORT).show()
             } catch (e: Exception) {
                 // Reset button state on error
                 btnResetSettings.isEnabled = true
-                btnResetSettings.text = "Reset to Defaults"
+                btnResetSettings.text = getString(R.string.reset_to_defaults)
                 Toast.makeText(requireContext(), "Error resetting settings: ${e.message}", Toast.LENGTH_LONG).show()
             }
             
         } catch (e: Exception) {
             // Reset button state on error
             btnResetSettings.isEnabled = true
-            btnResetSettings.text = "Reset to Defaults"
+            btnResetSettings.text = getString(R.string.reset_to_defaults)
             Toast.makeText(requireContext(), "Error resetting settings: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
@@ -398,7 +398,7 @@ class SettingsFragment : Fragment() {
         try {
             // Enable save button by default
             btnSaveSettings.isEnabled = true
-            btnSaveSettings.text = "Save Settings"
+            btnSaveSettings.text = getString(R.string.save_settings)
         } catch (e: Exception) {
         }
     }

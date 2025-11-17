@@ -189,6 +189,38 @@
     <string name="password_requirement">Iphasiwedi kufuneka ibe neempawu ezingaphantsi kwezi-6</string>
     <string name="confirm">Qinisekisa</string>
     <string name="view_full_quote">Jonga Ikhwothi Epheleleyo</string>
+    <string name="notifications">Izaziso</string>
+    <string name="motivation_message_info">Fumana imiyalezo ekhuthazayo xa usenza ii-quote</string>
+    <string name="enable_notifications">Vula Izaziso</string>
+    <string name="notifications_enabled">Izaziso zivuliwe</string>
+    <string name="back_to_home">Buyela Ekhaya</string>
+    <string name="notifications_disabled">Izaziso zikhutshaziwe</string>
+    <string name="logout_title">Phuma</string>
+    <string name="logout_message">Uqinisekile ukuba ufuna ukuphuma? Kuya kufuneka ungene kwakhona ukuze ufumane ukufikelela kwiakhawunti yakho.</string>
+    <string name="logout_confirm">Phuma</string>
+    <string name="reset_notification_title">Seta kwakhona Imiqondiso yeSaziso</string>
+    <string name="reset_notification_message">Oku kuya kuseta kwakhona yonke imiqondiso yeendawo zesenzo ukuze uphinde ufumane izaziso kuwo onke amanqanaba. Oku kuluncedo kuvavanyo.\n\nUqinisekile?</string>
+    <string name="reset_notification_confirm">Seta kwakhona</string>
+    <string name="temporary_client">Umthengi Wesikhashana</string>
+    <string name="address_not_available">Idilesi ayifumaneki</string>
+    <string name="saving">Ukugcina...</string>
+    <string name="resetting">Kuyaphinda...</string>
+    <string name="reset_to_defaults">Buyisela kwiimfanelo ezizenzekelayo</string>
+    <string name="status_new">Entsha</string>
+    <string name="status_contacted">Qhagamshelwe</string>
+    <string name="status_qualified">Kuyafanelekela</string>
+    <string name="status_negotiating">Uxoxiswano</string>
+    <string name="status_closed_won">Kuvaliwe - Kuphumelele</string>
+    <string name="status_closed_lost">Kuvaliwe - Kuphumelelanga</string>
+    <string name="status_new_desc">Ilayidi isandul’ ukudalwa</string>
+    <string name="status_contacted_desc">Uqhagamshelo lokuQala lwenziwe</string>
+    <string name="status_qualified_desc">Ilayidi ihlangabezana neemfuno zethu</string>
+    <string name="status_negotiating_desc">Kuxoxwa ngemigomo kunye nexabiso</string>
+    <string name="status_closed_won_desc">Guqulwe ngempumelelo ibe ngumthengi</string>
+    <string name="status_closed_lost_desc">Ilayidi ayiphumelelanga</string>
+    <string name="not_provided">Ayikho inikezelwe</string>
+    <string name="select_follow_up_date">Khetha umhla wokulandela</string>
+    <string name="email_text">Imeyile:</string>
 
     <!-- Biometric Authentication -->
     <string name="biometric_prompt_title">Ungeniso Ngomnwe</string>
@@ -200,5 +232,8 @@
     <string name="biometric_not_available">Uqinisekiso lomnwe alufumaneki kule sixhobo</string>
     <string name="biometric_not_enrolled">Akukho mnwe ubhalisiweyo. Nceda wongeze omnye kuseto lwesixhobo</string>
     <string name="secret_key_name">biometric_sample_encryption_key</string>
+    <string name="enable_biometric_message">Ngaba ungathanda ukuvula ukungena usebenzisa iminwe yakho ukuze ufike ngokukhawuleza kwixesha elizayo?</string>
+    <string name="enable">Vula</string>
+    <string name="not_now">Hayi ngoku</string>
 
 </resources>

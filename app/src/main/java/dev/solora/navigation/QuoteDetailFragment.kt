@@ -160,11 +160,20 @@ class QuoteDetailFragment : Fragment() {
             "REF-${quote.id?.takeLast(5) ?: "00000"}"
         }
         tvQuoteReference.text = getString(R.string.reference_number_with_value, reference)
-        
+
         // Client details
-        tvClientName.text = quote.clientName.ifEmpty { "Temporary Client" }
-        tvClientAddress.text = quote.address.ifEmpty { "Address not available" }
-        
+        tvClientName.text = if (quote.clientName.isNotEmpty()) {
+            quote.clientName
+        } else {
+            getString(R.string.temporary_client)
+        }
+
+        tvClientAddress.text = if (quote.address.isNotEmpty()) {
+            quote.address
+        } else {
+            getString(R.string.address_not_available)
+        }
+
         // Date
         val dateText = quote.createdAt?.toDate()?.let {
             SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(it)

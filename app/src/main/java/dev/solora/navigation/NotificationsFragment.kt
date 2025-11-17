@@ -126,13 +126,12 @@ class NotificationsFragment : Fragment() {
             Toast.makeText(requireContext(), "Push notifications enabled", Toast.LENGTH_SHORT).show()
         }
     }
-    
+
     private fun updateNotificationStatus(isEnabled: Boolean) {
         tvNotificationStatus?.text = if (isEnabled) {
-            "Notifications enabled"
+            getString(R.string.notifications_enabled)
         } else {
-            "Notifications disabled"
+            getString(R.string.notifications_disabled)
         }
     }
-    
 }

@@ -189,8 +189,38 @@
     <string name="password_requirement">Password must be at least 6 characters long</string>
     <string name="confirm">Confirm</string>
     <string name="view_full_quote">View Full Quote</string>
-
-
+    <string name="notifications">Notifications</string>
+    <string name="motivation_message_info">Get motivational messages when you create quotes</string>
+    <string name="enable_notifications">Enable Notifications</string>
+    <string name="notifications_enabled">Notifications enabled</string>
+    <string name="back_to_home">Back to Home</string>
+    <string name="notifications_disabled">Notifications disabled</string>
+    <string name="logout_title">Logout</string>
+    <string name="logout_message">Are you sure you want to logout? You will need to sign in again to access your account.</string>
+    <string name="logout_confirm">Logout</string>
+    <string name="reset_notification_title">Reset Notification Milestones</string>
+    <string name="reset_notification_message">This will reset all notification milestones so you can receive notifications again for all levels. This is useful for testing.\n\nAre you sure?</string>
+    <string name="reset_notification_confirm">Reset</string>
+    <string name="temporary_client">Temporary Client</string>
+    <string name="address_not_available">Address not available</string>
+    <string name="saving">Saving...</string>
+    <string name="resetting">Resetting...</string>
+    <string name="reset_to_defaults">Reset to Defaults</string>
+    <string name="status_new">New</string>
+    <string name="status_contacted">Contacted</string>
+    <string name="status_qualified">Qualified</string>
+    <string name="status_negotiating">Negotiating</string>
+    <string name="status_closed_won">Closed - Won</string>
+    <string name="status_closed_lost">Closed - Lost</string>
+    <string name="status_new_desc">Lead has just been created</string>
+    <string name="status_contacted_desc">Initial contact has been made</string>
+    <string name="status_qualified_desc">Lead meets our criteria</string>
+    <string name="status_negotiating_desc">Discussing terms and pricing</string>
+    <string name="status_closed_won_desc">Successfully converted to customer</string>
+    <string name="status_closed_lost_desc">Lead did not convert</string>
+    <string name="not_provided">Not provided</string>
+    <string name="select_follow_up_date">Select Follow-up Date</string>
+    <string name="email_text">Email:</string>
 
     <!-- Web client ID from Firebase Console - required for requestIdToken -->
     <string name="default_web_client_id">570014568272-akipotsp9timh1g4tescrdnh71tblmth.apps.googleusercontent.com</string>
@@ -205,6 +235,10 @@
     <string name="biometric_not_available">Fingerprint authentication not available on this device</string>
     <string name="biometric_not_enrolled">No fingerprint enrolled. Please add fingerprint in device settings</string>
     <string name="secret_key_name">biometric_sample_encryption_key</string>
+    <string name="enable_biometric_message">Would you like to enable fingerprint login for faster access next time?</string>
+    <string name="enable">Enable</string>
+    <string name="not_now">Not now</string>
+
 </resources>
 
 

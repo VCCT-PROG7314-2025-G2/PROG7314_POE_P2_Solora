@@ -28,7 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="Notifications"
+            android:text="@string/notifications"
             android:textColor="@android:color/white"
             android:textSize="@dimen/text_size_title"
             android:textStyle="bold"
@@ -63,7 +63,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Push Notifications"
+                    android:text="@string/push_notifications"
                     android:textColor="@color/solora_orange"
                     android:textSize="20sp"
                     android:textStyle="bold"
@@ -72,7 +72,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Get motivational messages when you create quotes"
+                    android:text="@string/motivation_message_info"
                     android:textColor="#666666"
                     android:textSize="14sp"
                     android:layout_marginBottom="20dp" />
@@ -88,7 +88,7 @@
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Enable Notifications"
+                        android:text="@string/enable_notifications"
                         android:textColor="#333333"
                         android:textSize="16sp" />
 
@@ -105,7 +105,7 @@
                     android:id="@+id/tv_notification_status"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Notifications enabled"
+                    android:text="@string/notifications_enabled"
                     android:textColor="@color/solora_orange"
                     android:textSize="14sp"
                     android:layout_marginTop="12dp" />
@@ -119,7 +119,7 @@
             android:id="@+id/btn_back_to_home"
             android:layout_width="wrap_content"
             android:layout_height="44dp"
-            android:text="Back to Home"
+            android:text="@string/back_to_home"
             android:textColor="@android:color/white"
             android:backgroundTint="@color/solora_orange"
             android:minWidth="140dp"

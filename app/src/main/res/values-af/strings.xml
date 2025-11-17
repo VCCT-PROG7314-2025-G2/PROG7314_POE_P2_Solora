@@ -189,7 +189,38 @@
     <string name="password_requirement">Wagwoord moet minstens 6 karakters lank wees</string>
     <string name="confirm">Bevestig</string>
     <string name="view_full_quote">Bekyk Volledige Kwotasie</string>
-
+    <string name="notifications">Kennisgewings</string>
+    <string name="motivation_message_info">Kry motiveringsboodskappe wanneer jy kwotasies skep</string>
+    <string name="enable_notifications">Aktiveer Kennisgewings</string>
+    <string name="notifications_enabled">Kennisgewings geaktiveer</string>
+    <string name="back_to_home">Terug na Tuis</string>
+    <string name="notifications_disabled">Kennisgewings gedeaktiveer</string>
+    <string name="logout_title">Teken uit</string>
+    <string name="logout_message">Is jy seker jy wil uitteken? Jy sal weer moet aanmeld om toegang tot jou rekening te kry.</string>
+    <string name="logout_confirm">Teken uit</string>
+    <string name="reset_notification_title">Herstel Kennisgewing Mylpale</string>
+    <string name="reset_notification_message">Dit sal alle kennisgewing mylpale terugstel sodat jy weer kennisgewings vir alle vlakke kan ontvang. Dit is nuttig vir toetsing.\n\nIs jy seker?</string>
+    <string name="reset_notification_confirm">Herstel</string>
+    <string name="temporary_client">Tydelike Kliënt</string>
+    <string name="address_not_available">Adres nie beskikbaar nie</string>
+    <string name="saving">Besig om te stoor...</string>
+    <string name="resetting">Besig om te herstel...</string>
+    <string name="reset_to_defaults">Herstel na verstek</string>
+    <string name="status_new">Nuut</string>
+    <string name="status_contacted">Gekontak</string>
+    <string name="status_qualified">Gekwalifiseerd</string>
+    <string name="status_negotiating">Onderhandel</string>
+    <string name="status_closed_won">Gesluit - Gewen</string>
+    <string name="status_closed_lost">Gesluit - Verloor</string>
+    <string name="status_new_desc">Lead is pas geskep</string>
+    <string name="status_contacted_desc">Aanvangskontak is gemaak</string>
+    <string name="status_qualified_desc">Lead voldoen aan ons kriteria</string>
+    <string name="status_negotiating_desc">Bespreking van terme en prys</string>
+    <string name="status_closed_won_desc">Suksesvol na klant omgeskakel</string>
+    <string name="status_closed_lost_desc">Lead het nie omgeskakel nie</string>
+    <string name="not_provided">Nie voorsien nie</string>
+    <string name="select_follow_up_date">Kies opvolgdatum</string>
+    <string name="email_text">E-pos:</string>
     <!-- Biometric Authentication -->
     <string name="biometric_prompt_title">Vingerafdruk Aanmelding</string>
     <string name="biometric_prompt_subtitle">Gebruik jou vingerafdruk om aan te meld</string>
@@ -200,6 +231,9 @@
     <string name="biometric_not_available">Vingerafdrukverifikasie is nie op hierdie toestel beskikbaar nie</string>
     <string name="biometric_not_enrolled">Geen vingerafdruk geregistreer nie. Voeg een by in die toestel se instellings</string>
     <string name="secret_key_name">biometric_sample_encryption_key</string>
+    <string name="enable_biometric_message">Wil u vingerafdruk-aanmelding inskakel vir vinniger toegang volgende keer?</string>
+    <string name="enable">Skakel in</string>
+    <string name="not_now">Nie nou nie</string>
 
 </resources>
 

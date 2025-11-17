@@ -353,18 +353,18 @@ class ProfileFragment : Fragment() {
             notificationManager.sendTestNotification()
         }
     }
-    
+
     private fun showResetNotificationsDialog() {
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Reset Notification Milestones")
-            .setMessage("This will reset all notification milestones so you can receive notifications again for all levels. This is useful for testing.\n\nAre you sure?")
-            .setPositiveButton("Reset") { _, _ ->
+            .setTitle(getString(R.string.reset_notification_title))
+            .setMessage(getString(R.string.reset_notification_message))
+            .setPositiveButton(getString(R.string.reset_notification_confirm)) { _, _ ->
                 resetNotificationMilestones()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
-    
+
     private fun resetNotificationMilestones() {
         viewLifecycleOwner.lifecycleScope.launch {
             try {
@@ -391,20 +391,19 @@ class ProfileFragment : Fragment() {
             }
         }
     }
-    
+
     private fun logout() {
-        // Show confirmation dialog
         MaterialAlertDialogBuilder(requireContext())
-            .setTitle("Logout")
-            .setMessage("Are you sure you want to logout? You will need to sign in again to access your account.")
+            .setTitle(getString(R.string.logout_title))
+            .setMessage(getString(R.string.logout_message))
             .setIcon(R.drawable.ic_logout)
-            .setPositiveButton("Logout") { _, _ ->
+            .setPositiveButton(getString(R.string.logout_confirm)) { _, _ ->
                 performLogout()
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton(getString(R.string.cancel), null)
             .show()
     }
-    
+
     private fun performLogout() {
         // Use AuthViewModel logout method (clears DataStore and Firebase Auth)
         authViewModel.logout()
