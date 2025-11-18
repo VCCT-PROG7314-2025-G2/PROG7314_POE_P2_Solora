@@ -588,6 +588,15 @@ This comprehensive approach ensures that Solora is not just a functional applica
 - **Android ViewModel and LiveData** - https://developer.android.com/topic/libraries/architecture/viewmodel
 - **Kotlin Coroutines** - https://kotlinlang.org/docs/coroutines-overview.html
 - **Android DataStore** - https://developer.android.com/topic/libraries/architecture/datastore
+- **Android Room Database** - https://developer.android.com/training/data-storage/room
+- **Android Biometric Authentication** - https://developer.android.com/training/sign-in/biometric-auth
+- **Android BiometricPrompt API** - https://developer.android.com/reference/androidx/biometric/BiometricPrompt
+- **Android Keystore System** - https://developer.android.com/training/articles/keystore
+- **Android Notifications** - https://developer.android.com/develop/ui/views/notifications
+- **Android Runtime Permissions** - https://developer.android.com/training/permissions/requesting
+- **Android ConnectivityManager** - https://developer.android.com/reference/android/net/ConnectivityManager
+- **Android WorkManager** - https://developer.android.com/topic/libraries/architecture/workmanager
+- **Android Localization** - https://developer.android.com/guide/topics/resources/localization
 
 ### Firebase and Backend Services
 - **Firebase Documentation** - https://firebase.google.com/docs
@@ -603,10 +612,32 @@ This comprehensive approach ensures that Solora is not just a functional applica
 - **Ktor HTTP Client** - https://ktor.io/docs/http-client.html
 - **Material Components for Android** - https://github.com/material-components/material-components-android
 - **Accompanist Permissions** - https://google.github.io/accompanist/permissions/
+- **Gson JSON Library** - https://github.com/google/gson
+- **AndroidX Room Persistence Library** - https://developer.android.com/jetpack/androidx/releases/room
+- **AndroidX Biometric Library** - https://developer.android.com/jetpack/androidx/releases/biometric
 
 ### External APIs
 - **NASA POWER API** - https://power.larc.nasa.gov/
 - **Google Geocoding API** - https://developers.google.com/maps/documentation/geocoding
+
+### Security and Cryptography
+- **Android Keystore System** - https://source.android.com/docs/security/features/keystore
+- **AES Encryption in Android** - https://developer.android.com/privacy-and-security/cryptography
+- **Android Security Best Practices** - https://developer.android.com/privacy-and-security/security-tips
+- **Cipher Class Documentation** - https://developer.android.com/reference/javax/crypto/Cipher
+- **KeyGenerator Documentation** - https://developer.android.com/reference/javax/crypto/KeyGenerator
+
+### Offline Data and Synchronization
+- **Room Database Guide** - https://developer.android.com/training/data-storage/room
+- **Room with Coroutines** - https://developer.android.com/training/data-storage/room/async-queries
+- **Offline Data Sync Patterns** - https://developer.android.com/topic/architecture/data-layer/offline-first
+- **Network Monitoring** - https://developer.android.com/training/monitoring-device-state/connectivity-status-type
+
+### Push Notifications and Messaging
+- **Firebase Cloud Messaging** - https://firebase.google.com/docs/cloud-messaging/android/client
+- **FCM Token Management** - https://firebase.google.com/docs/cloud-messaging/android/client#sample-register
+- **Android Notification Channels** - https://developer.android.com/develop/ui/views/notifications/channels
+- **NotificationCompat Builder** - https://developer.android.com/reference/androidx/core/app/NotificationCompat.Builder
 
 ### Development Tools and Resources
 - **Android Studio** - https://developer.android.com/studio
