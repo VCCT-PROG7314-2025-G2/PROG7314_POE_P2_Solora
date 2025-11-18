@@ -75,66 +75,122 @@
 - NASA POWER-assisted irradiance lookup via callable `calculateQuote` function when GPS coordinates are available.
 - Embedded validation, smart defaults (panel wattage, tariff, sun-hours), and quote history with search + pagination.
 
+<p align="center">
+  <img src="READMEAsset/Picture1.png" alt="Sales wizard screen" width="210">
+  <img src="READMEAsset/Picture2.png" alt="Quote details view" width="210">
+  <img src="READMEAsset/Picture3.png" alt="System sizing summary" width="210">
+  <img src="READMEAsset/Picture4.png" alt="Quote confirmation" width="210">
+</p>
+
 ### Lead CRM & Pipeline
 - Full CRUD for leads tied to the authenticated consultant with status filtering and free-text search.
 - Optional follow-up date scheduling for leads to track future engagement.
 - Lead detail dialog surfaces the latest quote attachments, notes, status updates, and quick actions.
 - Dashboard shortcuts show lead totals, growth, and quick filters to keep the pipeline healthy.
 
+<p align="center">
+  <img src="READMEAsset/Picture5.png" alt="Lead list pipeline" width="210">
+  <img src="READMEAsset/Picture6.png" alt="Lead filter chips" width="210">
+  <img src="READMEAsset/Picture7.png" alt="Lead detail dialog" width="210">
+  <img src="READMEAsset/Picture8.png" alt="Pipeline overview screen" width="210">
+</p>
+
 ### Authentication & Onboarding
 - Email/password, Google Sign-In, and “stay logged in” preferences managed by `AuthRepository`.
 - First-run onboarding screens explain the workflow; `AuthViewModel` tracks completion via DataStore.
 - Optional biometric login (fingerprint/face) with encrypted tokens (`CryptographyManager`, `BiometricPromptUtils`).
+
+<p align="center">
+  <img src="READMEAsset/Picture9.png" alt="Onboarding carousel" width="210">
+  <img src="READMEAsset/Picture10.png" alt="Login screen" width="210">
+  <img src="READMEAsset/Picture11.png" alt="Register screen" width="210">
+  <img src="READMEAsset/Picture12.png" alt="Biometric opt-in" width="210">
+</p>
 
 ### Engagement & Notifications
 - Dedicated `NotificationsFragment` with runtime permission prompts for Android 13+.
 - `MotivationalNotificationManager` syncs preferences to Firestore, stores them locally via DataStore, tracks milestones, and queues encouragement messages when users hit quote/lead goals.
 - Firebase Cloud Messaging service (`SoloraFirebaseMessagingService`) handles remote pushes for reminders and motivational nudges.
 
+<p align="center">
+  <img src="READMEAsset/Picture13.png" alt="Notifications settings" width="210">
+  <img src="READMEAsset/Picture14.png" alt="Motivational message" width="210">
+  <img src="READMEAsset/Picture15.png" alt="Permission prompt" width="210">
+  <img src="READMEAsset/Picture16.png" alt="Notification history" width="210">
+</p>
+
 ### Offline & Sync
 - True offline-first strategy: Room database (`LocalDatabase`, `LocalDao`, `LocalEntities`) mirrors quotes and leads per user.
 - `OfflineRepository` records offline work; `SyncManager` pushes unsynced items once `NetworkMonitor` reports connectivity.
 - Cloud `syncData` callable merges offline payloads with authoritative Firestore collections when needed.
+
+<p align="center">
+  <img src="READMEAsset/Picture17.png" alt="Offline sync indicator" width="210">
+  <img src="READMEAsset/Picture18.png" alt="Sync queue view" width="210">
+  <img src="READMEAsset/Picture19.png" alt="Connectivity status card" width="210">
+</p>
 
 ### PDF & Sharing
 - HTML-to-PDF generation (`PdfGenerator`, `PdfExporter`) builds branded proposals with company details from `CompanySettings`.
 - Secure storage beneath `Documents/Quotes` and Android `FileProvider`-backed sharing via `FileShareUtils`.
 - PDF preview flows with zooming, share sheet, and multi-language labels.
 
+<p align="center">
+  <img src="READMEAsset/Picture20.png" alt="PDF preview" width="210">
+  <img src="READMEAsset/Picture21.jpg" alt="Share sheet" width="210">
+  <img src="READMEAsset/Picture22.jpg" alt="PDF export confirmation" width="210">
+</p>
+
 ### Dashboard & Analytics
 - `DashboardViewModel` aggregates KPIs (avg system size, revenue, payback) with time filters (7d/30d/6m).
 - Custom `CircleChartView` in `ui/views` visualizes quote status distribution.
 - Monthly performance cards highlight growth while offline caches keep widgets responsive.
 
+<p align="center">
+  <img src="READMEAsset/Picture23.png" alt="Dashboard KPIs" width="210">
+  <img src="READMEAsset/Picture24.png" alt="Quote status charts" width="210">
+</p>
+
 ### Localization & Accessibility
 - Complete copy decks for English (default), Afrikaans (`values-af`), and isiXhosa (`values-xh`).
 - Material 3 theming with proper contrast, scalable typography (Poppins family), landscape-specific layouts, and custom toasts/snackbars for accessibility feedback.
+- Custom `ToastUtils` centralizes messaging; `home_header.xml` and other includes keep layouts consistent.
+
+<p align="center">
+  <img src="READMEAsset/Picture25.jpg" alt="Localized UI example" width="210">
+  <img src="READMEAsset/Picture26.png" alt="Accessibility friendly layout" width="210">
+</p>
 
 ## Feature Gallery
 <p align="center">
-  <img src="READMEAsset/AppPic3.jpg" alt="Quotes" width="197">
-  <img src="READMEAsset/AppPic4.jpg" alt="Quote Calculator" width="197">
-  <img src="READMEAsset/AppPic5.jpg" alt="Quote Summary" width="197">
-  <img src="READMEAsset/AppPic6.jpg" alt="Quote List" width="197">
-  <img src="READMEAsset/AppPic7.jpg" alt="Quote Detail" width="197">
+  <img src="READMEAsset/Picture1.png" alt="Quotes overview" width="197">
+  <img src="READMEAsset/Picture2.png" alt="Quote calculator" width="197">
+  <img src="READMEAsset/Picture3.png" alt="Quote summary" width="197">
+  <img src="READMEAsset/Picture4.png" alt="Quote status list" width="197">
+  <img src="READMEAsset/Picture5.png" alt="Lead pipeline" width="197">
 </p>
 
 <p align="center">
-  <img src="READMEAsset/AppPic9.jpg" alt="Leads" width="197">
-  <img src="READMEAsset/AppPic10.jpg" alt="Lead Detail" width="197">
-  <img src="READMEAsset/AppPic11.jpg" alt="Lead Filters" width="197">
+  <img src="READMEAsset/Picture6.png" alt="Lead filters" width="197">
+  <img src="READMEAsset/Picture7.png" alt="Lead detail" width="197">
+  <img src="READMEAsset/Picture8.png" alt="Pipeline analytics" width="197">
+  <img src="READMEAsset/Picture9.png" alt="Onboarding carousel" width="197">
+  <img src="READMEAsset/Picture10.png" alt="Login screen" width="197">
 </p>
 
 <p align="center">
-  <img src="READMEAsset/AppPic1.jpg" alt="Profile" width="197">
-  <img src="READMEAsset/AppPic2.jpg" alt="Settings" width="197">
-  <img src="READMEAsset/AppPic13.jpg" alt="Notifications" width="197">
-  <img src="READMEAsset/AppPic14.jpg" alt="Biometric" width="197">
+  <img src="READMEAsset/Picture11.png" alt="Registration screen" width="197">
+  <img src="READMEAsset/Picture12.png" alt="Biometric opt-in" width="197">
+  <img src="READMEAsset/Picture13.png" alt="Notifications settings" width="197">
+  <img src="READMEAsset/Picture14.png" alt="Motivational card" width="197">
 </p>
 
 <p align="center">
-  <img src="READMEAsset/AppPic8.jpg" alt="PDF Preview" width="197">
-  <img src="READMEAsset/AppPic12.jpg" alt="PDF Export" width="197">
+  <img src="READMEAsset/Picture15.png" alt="Permission prompt" width="197">
+  <img src="READMEAsset/Picture16.png" alt="Notification history" width="197">
+  <img src="READMEAsset/Picture20.png" alt="PDF preview" width="197">
+  <img src="READMEAsset/Picture21.jpg" alt="Share sheet" width="197">
+  <img src="READMEAsset/Picture22.jpg" alt="PDF export confirmation" width="197">
 </p>
 
 ## Architecture Overview
@@ -204,9 +260,18 @@
 - PDF: iText 7 (note: both `8.0.5` and `7.2.5` are present)
 - Material Components: `com.google.android.material:material:1.12.0`
 
+<p align="center">
+  <img src="READMEAsset/Picture27.png" alt="Android tech stack overview" width="210">
+  <img src="READMEAsset/Picture28.png" alt="Library configuration screen" width="210">
+</p>
+
 ### Cloud Functions
 - Node.js 22 (see `functions/package.json`)
 - `firebase-functions@^6`, `firebase-admin@^12`, `axios@^1.12`
+
+<p align="center">
+  <img src="READMEAsset/Picture29.png" alt="Cloud functions dashboard" width="210">
+</p>
 
 ## Project Modules
 | Path | Purpose |
@@ -274,6 +339,10 @@ Android app integrates these via `dev.solora.api.FirebaseFunctionsApi` and `dev.
 - `NotificationsFragment` centralizes motivational toggle, permission prompts, and “test notification” CTA.
 - Profile/Settings manage localization, company branding, PDF metadata, and authentication options.
 
+<p align="center">
+  <img src="READMEAsset/Picture30.png" alt="Navigation blueprint" width="210">
+</p>
+
 ## Permissions
 Declared in `AndroidManifest.xml`:
 - `INTERNET` (network, Firebase, NASA API)
@@ -335,6 +404,10 @@ Declared in `AndroidManifest.xml`:
    - Use Google Sign-In (if configured in your Firebase project)
 
 **Note:** Release signing is configured in `app/build.gradle.kts` with a keystore at `app/keystore/solora-release-key.keystore`. Adjust or remove this configuration if you use your own signing setup.
+
+<p align="center">
+  <img src="READMEAsset/Picture31.png" alt="Setup success screen" width="210">
+</p>
 
 ### Firebase Project Setup
 1) In Firebase Console, create a project (or reuse an existing one) and add an Android app with the correct `applicationId` (`dev.solora` by default).
