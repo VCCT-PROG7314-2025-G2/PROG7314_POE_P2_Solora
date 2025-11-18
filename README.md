@@ -16,7 +16,7 @@
 </p>
 
 ### Quick Links
-- 🎬 [YouTube demo](https://youtu.be/xt6IKx16-PY)
+- 🎬 [YouTube demo](https://www.youtube.com/watch?v=3UfTPazzZSY)
 - ☁️ [`functions/`](functions/) – Firebase Cloud Functions source
 - 📱 [`app/`](app/) – Android client (Kotlin, MVVM-ish)
 - 🖼️ [`READMEAsset/`](READMEAsset/) – Logos, UI mockups, and database captures
@@ -333,8 +333,20 @@ Declared in `AndroidManifest.xml`:
 6) **Sign in to the app:**
    - Use Email/Password authentication, or
    - Use Google Sign-In (if configured in your Firebase project)
+   - **First-time users:** Register a new account through the app's registration screen
+
+7) **Optional - Enable Biometric Login:**
+   - After logging in, go to Profile → Authentication
+   - Toggle "Enable Fingerprint Login"
+   - **Note:** Device must have at least one fingerprint enrolled in system settings
 
 **Note:** Release signing is configured in `app/build.gradle.kts` with a keystore at `app/keystore/solora-release-key.keystore`. Adjust or remove this configuration if you use your own signing setup.
+
+**First Run Issues?**
+- If the app crashes on first launch, ensure `google-services.json` is correctly placed in `app/`
+- For "Failed to authenticate" errors, verify Firebase Auth providers are enabled
+- If quotes fail to calculate, check that Cloud Functions are deployed and accessible
+- Grant notification permissions when prompted to receive milestone notifications
 
 ### Firebase Project Setup
 1) In Firebase Console, create a project (or reuse an existing one) and add an Android app with the correct `applicationId` (`dev.solora` by default).
