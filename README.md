@@ -16,7 +16,7 @@
 </p>
 
 ### Quick Links
-- 🎬 [YouTube demo](https://youtu.be/wNVhsIj4Qn4?si=T80afQpQ41UrxHtV)
+- 🎬 [YouTube demo](https://youtu.be/xt6IKx16-PY)
 - ☁️ [`functions/`](functions/) – Firebase Cloud Functions source
 - 📱 [`app/`](app/) – Android client (Kotlin, MVVM-ish)
 - 🖼️ [`READMEAsset/`](READMEAsset/) – Logos, UI mockups, and database captures
@@ -77,7 +77,8 @@
 
 ### Lead CRM & Pipeline
 - Full CRUD for leads tied to the authenticated consultant with status filtering and free-text search.
-- Lead detail dialog surfaces the latest quote attachments, notes, and quick actions.
+- Optional follow-up date scheduling for leads to track future engagement.
+- Lead detail dialog surfaces the latest quote attachments, notes, status updates, and quick actions.
 - Dashboard shortcuts show lead totals, growth, and quick filters to keep the pipeline healthy.
 
 ### Authentication & Onboarding
@@ -260,8 +261,9 @@ Android app integrates these via `dev.solora.api.FirebaseFunctionsApi` and `dev.
 
 ## Data Models (Firestore)
 - `FirebaseQuote`: id, reference, clientName, address, usageKwh, billRands, tariff, panelWatt, lat/lon, irradiance/sun-hours, calculation outputs, company/consultant snapshot, `userId`, `createdAt`, `updatedAt`.
-- `FirebaseLead`: id, name, email, phone, status, notes, `quoteId`, `userId`, timestamps.
-- `FirebaseUser`: id, name, surname, email, phone?, company?, role, timestamps.
+- `FirebaseLead`: id, name, email, phone, status, notes, `quoteId`, `followUpDate`, `userId`, `createdAt`, `updatedAt`.
+- `FirebaseUser`: id, name, surname, email, phone?, company?, role, fcmToken?, `createdAt`, `updatedAt`.
+- `FirebaseConfiguration`: id, nasaApiEnabled, nasaApiUrl, defaultTariff, defaultPanelWatt, companyInfo, `updatedAt`.
 
 ## App Navigation and Screens
 - Onboarding carousel (`fragment_onboarding`) stores completion state via `AuthViewModel`.
@@ -277,6 +279,7 @@ Declared in `AndroidManifest.xml`:
 - `INTERNET` (network, Firebase, NASA API)
 - `POST_NOTIFICATIONS` (runtime requested for Android 13+)
 - `READ_EXTERNAL_STORAGE` / `WRITE_EXTERNAL_STORAGE` (PDF export on older Androids)
+- `SCHEDULE_EXACT_ALARM` / `USE_EXACT_ALARM` (optional - for future alarm/reminder features)
 
 `FileProvider` is configured via `xml/file_paths.xml` for secure sharing of generated files (e.g., PDFs).
 
@@ -300,7 +303,7 @@ Declared in `AndroidManifest.xml`:
 
 1) **Clone the repository:**
    ```bash
-   git clone https://github.com/ST10359034/PROG7314_POE_P2_Solora.git
+   git clone https://github.com/VCCT-PROG7314-2025-G2/PROG7314_POE_P2_Solora.git
    cd PROG7314_POE_P2_Solora
    ```
 
@@ -575,9 +578,9 @@ This comprehensive approach ensures that Solora is not just a functional applica
 ### AI Tools and Development Assistance
 - **Claude AI** - Used for debugging, code suggestions, and development guidance throughout the project
 - **ChatGPT** - Used for debugging, code suggestions, and development guidance throughout the project
-- **Cursor IDE** - AI-powered code completion and suggestions during development
+- **Cursor IDE** - AI-powered code debug assitant and suggestions during development
 - **Quillbot AI** - AI-powered Grammar checker and paraphrasing tool
--
+
 
 ### Android Development
 - **Android Developer Documentation** - https://developer.android.com/
