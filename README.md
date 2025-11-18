@@ -301,6 +301,8 @@ Declared in `AndroidManifest.xml`:
 
 ### Android App Setup and Run
 
+**Quick Start:** A pre-built APK is available at `app/debug/app-debug.apk` - just copy it to your Android device and install (no build required).
+
 1) **Clone the repository:**
    ```bash
    git clone https://github.com/VCCT-PROG7314-2025-G2/PROG7314_POE_P2_Solora.git
@@ -323,11 +325,12 @@ Declared in `AndroidManifest.xml`:
    - The app targets SDK 35 and uses Kotlin 2.0.20
 
 5) **Run the application:**
-   - **Option A (Android Studio):** Click the Run button (green play icon) or press Shift+F10
-   - **Option B (Command Line):**
+   - **Option A (Pre-built APK):** Use `app/debug/app-debug.apk` (fastest for testing)
+   - **Option B (Android Studio):** Click the Run button (green play icon) or press Shift+F10
+   - **Option C (Build from source):**
      ```bash
-     ./gradlew :app:assembleDebug
-     # Then install the generated APK from app/build/outputs/apk/debug/
+     ./gradlew assembleDebug
+     # APK will be at: app/build/outputs/apk/debug/app-debug.apk
      ```
 
 6) **Sign in to the app:**
@@ -342,10 +345,15 @@ Declared in `AndroidManifest.xml`:
 
 **Note:** Release signing is configured in `app/build.gradle.kts` with a keystore at `app/keystore/solora-release-key.keystore`. Adjust or remove this configuration if you use your own signing setup.
 
+**Testing Key Features:**
+- **Biometric login:** Profile → Authentication → Enable Fingerprint (device must have fingerprint enrolled)
+- **Offline mode:** Disable WiFi, create quotes/leads, re-enable WiFi to see sync
+- **Notifications:** Reach milestones (5, 10, 25, 50, 100 leads or quotes) to trigger push notifications
+- **Multi-language:** Profile → Language → Switch between English/Afrikaans/isiXhosa
+
 **First Run Issues?**
 - If the app crashes on first launch, ensure `google-services.json` is correctly placed in `app/`
 - For "Failed to authenticate" errors, verify Firebase Auth providers are enabled
-- If quotes fail to calculate, check that Cloud Functions are deployed and accessible
 - Grant notification permissions when prompted to receive milestone notifications
 
 ### Firebase Project Setup
